@@ -18,7 +18,7 @@ from numpy import arange
 
 ## Random random utilities...
 def RRGB(l = 0x0, u = 0xff, s = 0x20): return [RA(l, u, s) for _ in range(3)]
-def RBW(l = 0x32, u = 0xd0, s = 0x20): return [RA(l, u, s)] * 3 if RA(20) > 0 else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams
+def RBW(l = 0x32, u = 0xd0, s = 0x20): return [RA(l, u, s)] * 0x3 if RA(0x10) else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams
 RRC = RBW if(0x1) else RRGB
 def RR(l):  return RA(int(l/0x20), int(0x1f * l/0x20))
 def RXY(l): return [RR(l) for _ in range(2)]
@@ -28,13 +28,13 @@ def distanceLp(x, y, p):
 	return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p)
 
 ## Actual stuff...
-def lp_Voronoi_diagram(w = 0x100, c = 0x8, p = 2.0, sd = 0x303, show = False):
+def lp_Voronoi_diagram(w = 0x100, c = 0x10, p = 2.0, sd = 0x303, show = False):
 	seed(sd) # Controlled randomness to get the same points for various p
 	image = Image.new("RGB", (w, w))
 	
 	# Just a standard random case... # Black & white...
 
-	nxy, nrgb = zip(*[(RXY(w), RRC(0, 0x100)) for _ in range(c)])
+	nxy, nrgb = zip(*[(RXY(w), RRC(0x0, 0x100)) for _ in range(c)])
 	nx, ny = zip(*nxy); nr, ng, nb = zip(*nrgb)
 	##Drawing...
 	img = image.load()
@@ -52,7 +52,7 @@ def lp_Voronoi_diagram(w = 0x100, c = 0x8, p = 2.0, sd = 0x303, show = False):
 	image.save(f, 'PNG')
 	print('Lp Voronoi diagram: {0}'.format(f))
 	return nx, ny
-def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, c = 0x8, p = 2.0):
+def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, c = 0x10, p = 2.0):
 	# Generate N(N-1) additional sites to form an NxN lattice
 	# ... and extra sites as well
 	c = len(NX); nx, ny = [], c*NY
@@ -83,7 +83,7 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, c = 0x8, p = 2.0):
 	f = './images/Lp-agnostic-Voronoi@{0}.png'.format(sd)
 	image.save(f, 'PNG'); #image.show()
 	print('Lp agnostic Voronoi diagram: {0}'.format(f))
-def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x8, p = 2.0, sites = False):
+def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, sites = False):
 	## Generate extra sites for extra precision (in locations
 	# where the classifications differ for Lp and for agnostic-Lp).
 	f = './images/Lp-agnostic-Voronoi-math-L{0}@{1}.png'.format(p, sd)
@@ -178,5 +178,5 @@ if(0x0): # ... and (supposedly) their more accurate versions
 	lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = True, sites = True, opr = '(a + 3*b)/4')
 ## ... a summary and fanfares!
 print('Elapsed time = {0}s'.format(round(TT() - start))); 
-for (p, l) in ((440, 125), (440, 125), (415, 125), (440, 250)): 
+for (p, l) in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): 
 	beep(p, l)

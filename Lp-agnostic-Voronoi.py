@@ -4,6 +4,7 @@
 # 3. Create a lattice of N(N - 1) sites for the generated N random ones
 # 4. Associate the new N(N - 1) sites to the classes accordingly to the diagram for the selected lp
 # 5. Generate o Voronoi diagram (for arbitrary p <= 2) for these NxN sites
+
 # REMARK: In order to (supposedly) improve approximation quality one can add a new (set of) 
 #         site(s) in the arbitrary position(s), together with the accompanying lattice points.
 

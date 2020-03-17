@@ -171,8 +171,8 @@ p, q, w = 2.0, 0.25, 0x100
 ## The reference diagram for p and just an illustration for q...
 NXY, _ = lp_Voronoi_diagram(w = w, c = c, sd = sd, p = p), lp_Voronoi_diagram(w = w, c = c, sd = sd, p = q)
 if(0x1): # ... the diagram's Lp-agnostic counterparts w.r.t. p and q
-	lp_agnostic_Voronoi_diagram(*NXY, w = w, p = p, q = q); 
-	lp_agnostic_Voronoi_diagram(*NXY, w = w, p = q, q = p); 
+	lp_agnostic_Voronoi_diagram(*NXY, w = w, p = p, q = q) 
+	lp_agnostic_Voronoi_diagram(*NXY, w = w, p = q, q = p) 
 	#lp_agnostic_Voronoi_ps(p = p, sd = sd)
 	#lp_agnostic_Voronoi_ps(p = q, sd = sd)
 if(0x0): # ... and (supposedly) their more accurate versions
@@ -180,6 +180,6 @@ if(0x0): # ... and (supposedly) their more accurate versions
 	lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = True)
 	lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = True, sites = True, opr = '(a + 3*b)/4')
 ## ... a summary and fanfares!
-print('Elapsed time = {0}s'.format(round(TT() - start))); 
+print('Elapsed time = {0}s'.format(round(TT() - start))) 
 for (p, l) in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): 
 	beep(p, l)

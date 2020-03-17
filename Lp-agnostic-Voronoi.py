@@ -17,15 +17,15 @@ import os.path
 from numpy import arange
 
 ## Random random utilities...
-def RRGB(l = 0x0, u = 0xff, s = 0x20): return [RA(l, u, s) for _ in range(3)]
-def RBW(l = 0x32, u = 0xd0, s = 0x20): return [RA(l, u, s)] * 0x3 if RA(0x10) else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams
+def RRGB(l = 0x0, u = 0xff, s = 0x20): return [RA(l, u, s) for _ in range(0x3)]
+def RBW(l = 0x32, u = 0xd0, s = 0x20): return [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams
 RRC = RBW if(0x1) else RRGB
 def RR(l):  return RA(int(l/0x20), int(0x1f * l/0x20))
 def RXY(l): return [RR(l) for _ in range(2)]
 
 ## A pivotal yet elementary function...
 def distanceLp(x, y, p):
-	return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p)
+	return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p) if p > 0.0 else max(abs(x), abs(y))
 
 ## Actual stuff...
 def lp_Voronoi_diagram(w = 0x100, c = 0x10, p = 2.0, sd = 0x303, show = False):
@@ -52,7 +52,7 @@ def lp_Voronoi_diagram(w = 0x100, c = 0x10, p = 2.0, sd = 0x303, show = False):
 	image.save(f, 'PNG')
 	print('Lp Voronoi diagram: {0}'.format(f))
 	return nx, ny
-def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, c = 0x10, p = 2.0):
+def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, c = 0x10, p = 2.0, q = 0.25):
 	# Generate N(N-1) additional sites to form an NxN lattice
 	# ... and extra sites as well
 	c = len(NX); nx, ny = [], c*NY
@@ -73,17 +73,17 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, c = 0x10, p = 2.0):
 	# ... cells
 	for y in range(w):
 		for x in range(w):
-			dmin = distanceLp(w - 1, w - 1, p); j = -1
+			dmin = distanceLp(w - 1, w - 1, q); j = -1
 			for i in range(c):
-				d = distanceLp(nx[i] - x, ny[i] - y, p)
+				d = distanceLp(nx[i] - x, ny[i] - y, q)
 				if d < dmin:
 					dmin = d; j = i
 			img[x, y] = nr[j], ng[j], nb[j]
 
-	f = './images/Lp-agnostic-Voronoi@{0}.png'.format(sd)
+	f = './images/Lp-agnostic-Voronoi-L{0}@{1}.png'.format(q, sd)
 	image.save(f, 'PNG'); #image.show()
 	print('Lp agnostic Voronoi diagram: {0}'.format(f))
-def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, sites = False):
+def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sites = False):
 	## Generate extra sites for extra precision (in locations
 	# where the classifications differ for Lp and for agnostic-Lp).
 	f = './images/Lp-agnostic-Voronoi-math-L{0}@{1}.png'.format(p, sd)
@@ -118,14 +118,14 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 	# ... cells
 	for y in range(w):
 		for x in range(w):
-			dmin = distanceLp(w - 1, w - 1, p); j = -1
+			dmin = distanceLp(w - 1, w - 1, q); j = -1
 			for i in range(c):
-				d = distanceLp(nx[i] - x, ny[i] - y, p)
+				d = distanceLp(nx[i] - x, ny[i] - y, q)
 				if d < dmin:
 					dmin = d; j = i
 			img[x, y] = nr[j], ng[j], nb[j]
 
-	f = './images/Lp-improved-agnostic-Voronoi@{0}.png'.format(sd)
+	f = './images/Lp-improved-agnostic-Voronoi-L{0}@{1}.png'.format(q, sd)
 	image.save(f, 'PNG'); #image.show()
 	print('Lp improved agnostic Voronoi diagram: {0}'.format(f))
 	## ... sites
@@ -166,12 +166,15 @@ start, rsd = TT(), int(RA(0x12345678))
 c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else \
 	    (int(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
 ## Lp, with p as a reference and q as an illustration
-p, q, w = 2.0, 0.5, 0x100
+p, q, w = 2.0, 0.25, 0x100
 
 ## The reference diagram for p and just an illustration for q...
 NXY, _ = lp_Voronoi_diagram(w = w, c = c, sd = sd, p = p), lp_Voronoi_diagram(w = w, c = c, sd = sd, p = q)
-if(0x1): # ... the diagram's Lp-agnostic counterparts
-	lp_agnostic_Voronoi_diagram(*NXY, w = w, p = p); lp_agnostic_Voronoi_ps(p = p, sd = sd)
+if(0x1): # ... the diagram's Lp-agnostic counterparts w.r.t. p and q
+	lp_agnostic_Voronoi_diagram(*NXY, w = w, p = p, q = q); 
+	lp_agnostic_Voronoi_diagram(*NXY, w = w, p = q, q = p); 
+	#lp_agnostic_Voronoi_ps(p = p, sd = sd)
+	#lp_agnostic_Voronoi_ps(p = q, sd = sd)
 if(0x0): # ... and (supposedly) their more accurate versions
 	lp_improved_agnostic_Voronoi_diagram(*NXY, w = w, c = c, p = p, m = 0x1, sites = False)
 	lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = True)

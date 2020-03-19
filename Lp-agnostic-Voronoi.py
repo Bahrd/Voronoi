@@ -20,24 +20,24 @@ from numpy import arange
 def ITT(f):
 	def time_warper_wrapper(*args, **kwargs): 
 		begin = TT() # from time import time as TT
-		f(*args, **kwargs) 
-		end = TT() 
+		r = f(*args, **kwargs) 
+		end = TT()
 		print('{0} evaluated in {1}s'.format(f.__name__, round(end - begin)))
+		return r
 	return time_warper_wrapper
-
 ## Random random utilities...
 def RRGB(l = 0x0, u = 0xff, s = 0x20): return [RA(l, u, s) for _ in range(0x3)]
 def RBW(l = 0x32, u = 0xd0, s = 0x20): return [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams
 RRC = RBW if(0x1) else RRGB
 def RR(l):  return RA(int(l/0x20), int(0x1f * l/0x20))
 def RXY(l): return [RR(l) for _ in range(2)]
-
 ## A pivotal yet elementary function...
 def distanceLp(x, y, p):
 	return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p) if p > 0.0 else max(abs(x), abs(y))
 
-## Actual stuff...
-def lp_Voronoi_diagram(w = 0x100, c = 0x10, p = 2.0, sd = 0x303, show = False):
+## Actual stuff... (decorated for fun with a timer)
+@ITT
+def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 	seed(sd) # Controlled randomness to get the same points for various p
 	image = Image.new("RGB", (w, w))
 	
@@ -60,9 +60,8 @@ def lp_Voronoi_diagram(w = 0x100, c = 0x10, p = 2.0, sd = 0x303, show = False):
 	f = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
 	image.save(f, 'PNG')
 	return nx, ny
-
 @ITT
-def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, c = 0x10, p = 2.0, q = 0.25):
+def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10):
 	# Generate N(N-1) additional sites to form an NxN lattice
 	# ... and extra sites as well
 	c = len(NX); nx, ny = [], c*NY
@@ -91,99 +90,19 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, c = 0x10, p = 2.0, q = 0.25):
 			img[x, y] = nr[j], ng[j], nb[j]
 
 	f = './images/Lp-agnostic-Voronoi-L{0}@{1}.png'.format(q, sd)
-	image.save(f, 'PNG'); #image.show()
-
-@ITT
-def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sites = False):
-	## Generate extra sites for extra precision (in locations
-	# where the classifications differ for Lp and for agnostic-Lp).
-	f = './images/Lp-agnostic-Voronoi-math-L{0}@{1}.png'.format(p, sd)
-	image = Image.open(f); img = image.load()
-	w = image.size[0]
-	#seed(TT())
-	ax, ay = [], []
-	while(len(ax) < m * c):
-		x, y = RXY(w)
-		if(img[x, y] != (0x0, 0x0, 0x0)):
-			ax += [x]; ay += [y]
-	image.close()
-	NX += tuple(ax); NY += tuple(ay)
-	
-	# Generate N(N-1) additional sites to form an NxN lattice
-	# ... and extra sites as well
-	c = len(NX); nx, ny = [], c*NY
-	for n in range(c):
-		nx += c*[NX[n]]		
-	c *= len(NY);
-
-	# Set sites' classes from the image
-	f = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
-	image = Image.open(f); img = image.load()
-	w = image.size[0]
-	nr, ng, nb = zip(*[img[nx[j], ny[j]] for j in range(c)])
-	image.close()
-	
-	## Drawing...
-	image = Image.new("RGB", (w, w))
-	img = image.load()
-	# ... cells
-	for y in range(w):
-		for x in range(w):
-			dmin = distanceLp(w - 1, w - 1, q); j = -1
-			for i in range(c):
-				d = distanceLp(nx[i] - x, ny[i] - y, q)
-				if d < dmin:
-					dmin = d; j = i
-			img[x, y] = nr[j], ng[j], nb[j]
-
-	f = './images/Lp-improved-agnostic-Voronoi-L{0}@{1}.png'.format(q, sd)
-	image.save(f, 'PNG'); #image.show()
-	## ... sites
-	if(sites):
-		px = [-1, 0, 1]
-		for dx in px:
-			for dy in px:
-				for i in range(len(NX)):
-					img[NX[i] + dx, NY[i] + dy] = (0xff, 0x0, 0x0)
-				for i in range(len(ax)):
-					img[ax[i] + dx, ay[i] + dy] = (0xff, 0xff, 0xff)
-		## ... and the lattice
-		#px = [0]
-		#for dx in px:
-		#	for dy in px:
-		#		for i in range(c):
-		#			img[nx[i] + dx, ny[i] + dy] = (0xff, 0xff, 0xff)
-		f = './images/Lp-improved-agnostic-Voronoi-sites@{0}.png'.format(sd)
-		image.save(f, 'PNG'); #image.show()
-
-def lp_agnostic_Voronoi_ps(p = 2, sd = 0x303, improved = False, sites = False, opr = 'abs(a - b)'):
-	imp, sts = 'improved-' if improved else '', '-sites' if sites else ''
-	
-	fa = './images/Lp-{0}agnostic-Voronoi{1}-L{2}@{3}.png'.format(imp, sts, p, sd)
-	if(os.path.isfile(fa)):
-		fp = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
-		fav, fpv = Image.open(fa), Image.open(fp); fdv = Image.new('RGB', fpv.size)
-		#ImageMath doesn't process RGB images (yet)...
-		fdv = Image.merge('RGB', [ImageMath.eval('convert({0}, "L")'.format(opr), a = ipb, b = iqb) \
-								  for (ipb, iqb) in zip(fpv.split(), fav.split())])
-		f = './images/Lp-{0}agnostic-Voronoi-math{1}-L{2}@{3}.png'.format(imp, sts, p, sd)
-		fdv.save(f, 'PNG')
-		fpv.close(); fdv.close()
+	image.save(f, 'PNG')
+	image.save(f, 'PNG')
 
 ## Show time off!
 rsd = int(RA(0x12345678))
 c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else \
 	    (int(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
-## Lp, with p as a reference and q as an illustration
+# Lp, with p as a reference and q as an illustration
 p, q, w = 2.0, 0.25, 0x100
-
-## The reference diagram for p and just an illustration for q...
-NXY, _ = lp_Voronoi_diagram(w = w, c = c, sd = sd, p = p), lp_Voronoi_diagram(w = w, c = c, sd = sd, p = q)
+# The reference diagram for p and just an illustration for q...
+NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
 # ... the diagram's Lp-agnostic counterparts w.r.t. p and q
-lp_agnostic_Voronoi_diagram(*NXY, w = w, p = p, q = q) 
-lp_agnostic_Voronoi_diagram(*NXY, w = w, p = q, q = p) 
-
-## ... a summary and fanfares!
-for (p, l) in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): 
-	beep(p, l)
+for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi_diagram(*NXY, w, *pq)
+# ... a summary and fanfares!
+for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl)
 print('seed =', rsd)

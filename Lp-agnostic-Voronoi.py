@@ -35,7 +35,7 @@ def RXY(l): return [RR(l) for _ in range(2)]
 def distanceLp(x, y, p):
 	return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p) if p > 0.0 else max(abs(x), abs(y))
 
-## Actual stuff... (decorated for fun with a timer)
+## Actual stuff... 
 @ITT
 def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 	seed(sd) # Controlled randomness to get the same points for various p

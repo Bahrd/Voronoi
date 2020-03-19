@@ -10,6 +10,7 @@ from time import time as TT
 from random import randrange as RA, seed
 from numpy import arange
 from PIL import Image, ImageMath
+import os.path
 
 ## Random random utilities...
 def RRGB(l = 0x0, u = 0xff, s = 0x20): return [RA(l, u, s) for _ in range(0x3)]
@@ -86,3 +87,78 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 
 	f = './images/Lp-agnostic-Voronoi-L{0}@{1}.png'.format(q, sd)
 	image.save(f, 'PNG')
+@ITT
+def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False):
+	## Generate extra sites for extra precision (in locations
+	# where the classifications differ for Lp and for agnostic-Lp).
+	f = './images/Lp-agnostic-Voronoi-math-L{0}@{1}.png'.format(p, sd)
+	image = Image.open(f); img = image.load()
+	w = image.size[0]
+	#seed(TT())
+	ax, ay = [], []
+	while(len(ax) < m * c):
+		x, y = RXY(w)
+		if(img[x, y] != (0x0, 0x0, 0x0)):
+			ax += [x]; ay += [y]
+	image.close()
+	NX += tuple(ax); NY += tuple(ay)
+	
+	# Generate N(N-1) additional sites to form an NxN lattice
+	# ... and extra sites as well
+	c = len(NX); nx, ny = [], c*NY
+	for n in range(c):
+		nx += c*[NX[n]]		
+	c *= len(NY);
+
+	# Set sites' classes from the image
+	f = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
+	image = Image.open(f); img = image.load()
+	w = image.size[0]
+	nr, ng, nb = zip(*[img[nx[j], ny[j]] for j in range(c)])
+	image.close()
+	
+	## Drawing...
+	image = Image.new("RGB", (w, w))
+	img = image.load()
+	# ... cells
+	for y in range(w):
+		for x in range(w):
+			dmin = distanceLp(w - 1, w - 1, q); j = -1
+			for i in range(c):
+				d = distanceLp(nx[i] - x, ny[i] - y, q)
+				if d < dmin:
+					dmin = d; j = i
+			img[x, y] = nr[j], ng[j], nb[j]
+
+	f = './images/Lp-improved-agnostic-Voronoi-L{0}@{1}.png'.format(p, sd)
+	image.save(f, 'PNG'); #image.show()
+	## ... sites
+	if(sites):
+		px = [-1, 0, 1]
+		for dx in px:
+			for dy in px:
+				for i in range(len(NX)):
+					img[NX[i] + dx, NY[i] + dy] = (0xff, 0x0, 0x0)
+				for i in range(len(ax)):
+					img[ax[i] + dx, ay[i] + dy] = (0xff, 0xff, 0xff)
+		## ... and the lattice
+		#px = [0]
+		#for dx in px:
+		#	for dy in px:
+		#		for i in range(c):
+		#			img[nx[i] + dx, ny[i] + dy] = (0xff, 0xff, 0xff)
+		f = './images/Lp-improved-agnostic-Voronoi-sites@{0}.png'.format(sd)
+		image.save(f, 'PNG')
+def lp_agnostic_Voronoi_ps(p = 2, sd = 0x303, improved = False, sites = False, opr = 'abs(a - b)'):
+	imp, sts = 'improved-' if improved else '', '-sites' if sites else ''
+	
+	fa = './images/Lp-{0}agnostic-Voronoi{1}-L{2}@{3}.png'.format(imp, sts, p, sd)
+	if(os.path.isfile(fa)):
+		fp = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
+		fav, fpv = Image.open(fa), Image.open(fp); fdv = Image.new('RGB', fpv.size)
+		#ImageMath doesn't process RGB images (yet)...
+		fdv = Image.merge('RGB', [ImageMath.eval('convert({0}, "L")'.format(opr), a = ipb, b = iqb) \
+								  for (ipb, iqb) in zip(fpv.split(), fav.split())])
+		f = './images/Lp-{0}agnostic-Voronoi-math{1}-L{2}@{3}.png'.format(imp, sts, p, sd)
+		fdv.save(f, 'PNG')
+		fpv.close(); fdv.close()

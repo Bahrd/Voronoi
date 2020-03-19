@@ -14,8 +14,7 @@ from VoronoiUtilities import *
 
 ## Show time off!
 rsd = int(RA(0x12345678))
-c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else \
-	    (int(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
+c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
 
 # Lp, with p as a reference and q as an illustration
 p, q, w = 2.0, 0.25, 0x100

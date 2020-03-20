@@ -1,6 +1,6 @@
 ﻿## The Lp agnostic 1-NN algorithm illustration
 # 1. Generate N random sites inside a square
-# 2. Create the Voronoi's diagram for Lp, 0 < p ≤ 2 (p = 2.0 is somehow distingushed)
+# 2. Create the Voronoi diagram for Lp, 0 < p ≤ 2 (p = 2.0 is somehow distingushed)
 # 3. Create a lattice of N(N - 1) sites for the generated N random ones
 # 4. Associate the new N(N - 1) sites to the classes accordingly to the diagram for the selected Lp
 # 5. Generate o Voronoi diagram for these NxN sites

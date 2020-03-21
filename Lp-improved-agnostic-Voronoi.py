@@ -16,11 +16,12 @@ from VoronoiUtilities import *
 ## Voronoi diagrams and their agnostic versions...
 rsd = int(RA(0x12345678))
 c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
-# Lp, with p as a reference and q as an illustration
+
+# Lp, for p and q 
 p, q, w = 2.0, 0.25, 0x100
-# The reference diagram for p and just an illustration for q...
+# The reference diagrams for p and q...
 NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
-# ... the diagram's Lp-agnostic counterparts w.r.t. p and q
+# ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
 for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi_diagram(*NXY, w, *pq, c, sd)
 
 ## ... and (supposedly) their more accurate versions
@@ -31,7 +32,7 @@ if(0b1):
 	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, p, q, sd)
 	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, q, p, sd)
 
-if(0b0):_# TODO: Make it nicer with sites
+if(0b0): ... # TODO: Make it nicer with sites
 	#lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, p, q, sd, sites = True)
 	#lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, q, p, sd, sites = True)
 	#lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = True)

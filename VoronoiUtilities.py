@@ -16,8 +16,7 @@ import os.path
 RRGB = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
 RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams
 RRC = RBW if(0x1) else RRGB
-RR  = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20))
-RXY = lambda l: [RR(l) for _ in range(2)]
+RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
 ## A pivotal yet elementary function...
 distanceLp = lambda x, y, p: pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p) if p > 0.0 else max(abs(x), abs(y))
@@ -31,7 +30,6 @@ def ITT(f):
 		print('{0} evaluated in {1}s'.format(f.__name__, round(end - begin)))
 		return r
 	return time_warper_wrapper
-
 ## Actual stuff... 
 @ITT
 def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):

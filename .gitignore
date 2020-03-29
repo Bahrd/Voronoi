@@ -9,6 +9,9 @@
 *.user
 *.userosscache
 *.sln.docstates
+img-diff.py
+Lp-Voronoi.py
+Lp-Voronoi-diff.py
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

@@ -40,4 +40,4 @@ if(0b0): ... # TODO: Make it nicer with sites
 
 # ... a summary and fanfares!
 for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl)
-print('seed =', rsd)
+print('seed =', sd)

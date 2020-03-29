@@ -84,7 +84,7 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 					dmin = d; j = i
 			img[x, y] = nr[j], ng[j], nb[j]
 
-	f = './images/Lp-agnostic-Voronoi-L{0}@{1}.png'.format(q, sd)
+	f = './images/Lp-agnostic-Voronoi-L{0}@{1}.png'.format(p, sd)
 	image.save(f, 'PNG')
 @ITT
 def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False):

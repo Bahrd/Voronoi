@@ -36,7 +36,7 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 	seed(sd) # Controlled randomness to get the same points for various p
 	image = Image.new("RGB", (w, w))
 	
-	# Just a standard random case... # Black & white...
+	# Just a standard random case... # Black (, red) & white...
 
 	nxy, nrgb = zip(*[(RXY(w), RRC(0x0, 0x100)) for _ in range(c)])
 	nx, ny = zip(*nxy); nr, ng, nb = zip(*nrgb)
@@ -45,11 +45,11 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 	# ... cells
 	for y in range(w):
 		for x in range(w):
-			dmin = distanceLp(w - 1, w - 1, p); j = -1
+			dmin, j = distanceLp(w - 1, w - 1, p), -1
 			for i in range(c):
 				d = distanceLp(nx[i] - x, ny[i] - y, p)
 				if d < dmin:
-					dmin = d; j = i
+					dmin, j = d, i 
 			img[x, y] = nr[j], ng[j], nb[j]
 
 	f = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
@@ -77,11 +77,11 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 	# ... cells
 	for y in range(w):
 		for x in range(w):
-			dmin = distanceLp(w - 1, w - 1, q); j = -1
+			dmin, j = distanceLp(w - 1, w - 1, q), -1
 			for i in range(c):
 				d = distanceLp(nx[i] - x, ny[i] - y, q)
 				if d < dmin:
-					dmin = d; j = i
+					dmin, j = d, i
 			img[x, y] = nr[j], ng[j], nb[j]
 
 	f = './images/Lp-agnostic-Voronoi-L{0}@{1}.png'.format(p, sd)
@@ -122,11 +122,11 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 	# ... cells
 	for y in range(w):
 		for x in range(w):
-			dmin = distanceLp(w - 1, w - 1, q); j = -1
+			dmin, j = distanceLp(w - 1, w - 1, q), -1
 			for i in range(c):
 				d = distanceLp(nx[i] - x, ny[i] - y, q)
 				if d < dmin:
-					dmin = d; j = i
+					dmin, j = d, i
 			img[x, y] = nr[j], ng[j], nb[j]
 
 	f = './images/Lp-improved-agnostic-Voronoi-L{0}@{1}.png'.format(p, sd)

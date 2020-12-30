@@ -27,12 +27,12 @@ def ITT(f):
 		begin = TT() # from time import time as TT
 		r = f(*args, **kwargs) 
 		end = TT()
-		print('{0} evaluated in {1}s'.format(f.__name__, round(end - begin)))
+		print('{} evaluated in {}s'.format(f.__name__, round(end - begin)))
 		return r
 	return time_warper_wrapper
 ## Actual stuff... 
 @ITT
-def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
+def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, extensions = ['PNG']):
 	seed(sd) # Controlled randomness to get the same points for various p
 	image = Image.new("RGB", (w, w))
 	
@@ -52,11 +52,13 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 					dmin, j = d, i 
 			img[x, y] = nr[j], ng[j], nb[j]
 
-	f = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
-	image.save(f, 'PNG')
+	for ext in extensions:
+		f = './images/Voronoi-L{}@{}.{}'.format(p, sd, ext)
+		image.save(f, ext, dpi = (72, 72))	
+
 	return nx, ny
 @ITT
-def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, sd = 0x303):
+def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, sd = 0x303, sites = False, extensions = ['PNG']):
 	# Generate N(N-1) additional sites to form an NxN lattice
 	# ... and extra sites as well
 	c = len(NX); nx, ny = [], c*NY
@@ -65,7 +67,7 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 	c *= len(NY);
 
 	# Set sites' classes from the image
-	f = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
+	f = './images/Voronoi-L{}@{}.png'.format(p, sd)
 	image = Image.open(f); img = image.load()
 	w = image.size[0]
 	nr, ng, nb = zip(*[img[nx[j], ny[j]] for j in range(c)])
@@ -84,13 +86,24 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 					dmin, j = d, i
 			img[x, y] = nr[j], ng[j], nb[j]
 
-	f = './images/Lp-agnostic-Voronoi-L{0}@{1}.png'.format(p, sd)
-	image.save(f, 'PNG')
+	if(sites):
+		px = [-1, 0, 1]
+		for dx in px:
+			for dy in px:
+				for i in range(len(NX)):
+					img[NX[i] + dx, NY[i] + dy] = (0xff, 0xff, 0x0)
+		for i in range(len(nx)):
+			img[nx[i], ny[i]] = (0x00, 0xff, 0x00)
+	
+	for ext in extensions:
+		f = './images/Lp-agnostic-Voronoi-L{}@{}.{}'.format(p, sd, ext)
+		image.save(f, ext, dpi = (72, 72))	
+
 @ITT
 def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False):
 	## Generate extra sites for extra precision (in locations
 	# where the classifications differ for Lp and for agnostic-Lp).
-	f = './images/Lp-agnostic-Voronoi-math-L{0}@{1}.png'.format(p, sd)
+	f = './images/Lp-agnostic-Voronoi-math-L{}@{}.png'.format(p, sd)
 	image = Image.open(f); img = image.load()
 	w = image.size[0]
 	#seed(TT())
@@ -110,7 +123,7 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 	c *= len(NY);
 
 	# Set sites' classes from the image
-	f = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
+	f = './images/Voronoi-L{}@{}.png'.format(p, sd)
 	image = Image.open(f); img = image.load()
 	w = image.size[0]
 	nr, ng, nb = zip(*[img[nx[j], ny[j]] for j in range(c)])
@@ -129,7 +142,7 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 					dmin, j = d, i
 			img[x, y] = nr[j], ng[j], nb[j]
 
-	f = './images/Lp-improved-agnostic-Voronoi-L{0}@{1}.png'.format(p, sd)
+	f = './images/Lp-improved-agnostic-Voronoi-L{}@{}.png'.format(p, sd)
 	image.save(f, 'PNG'); #image.show()
 	## ... sites
 	if(sites):
@@ -146,18 +159,18 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 		#	for dy in px:
 		#		for i in range(c):
 		#			img[nx[i] + dx, ny[i] + dy] = (0xff, 0xff, 0xff)
-		f = './images/Lp-improved-agnostic-Voronoi-sites@{0}.png'.format(sd)
+		f = './images/Lp-improved-agnostic-Voronoi-sites@{}.png'.format(sd)
 		image.save(f, 'PNG')
 def lp_agnostic_Voronoi_ps(p = 2, sd = 0x303, improved = False, sites = False, opr = 'abs(a - b)'):
 	imp, sts = 'improved-' if improved else '', '-sites' if sites else ''
 	
-	fa = './images/Lp-{0}agnostic-Voronoi{1}-L{2}@{3}.png'.format(imp, sts, p, sd)
+	fa = './images/Lp-{}agnostic-Voronoi{}-L{}@{}.png'.format(imp, sts, p, sd)
 	if(os.path.isfile(fa)):
-		fp = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
+		fp = './images/Voronoi-L{}@{}.png'.format(p, sd)
 		fav, fpv = Image.open(fa), Image.open(fp); fdv = Image.new('RGB', fpv.size)
 		#ImageMath doesn't process RGB images (yet)...
-		fdv = Image.merge('RGB', [ImageMath.eval('convert({0}, "L")'.format(opr), a = ipb, b = iqb) \
+		fdv = Image.merge('RGB', [ImageMath.eval('convert({}, "L")'.format(opr), a = ipb, b = iqb) \
 								  for (ipb, iqb) in zip(fpv.split(), fav.split())])
-		f = './images/Lp-{0}agnostic-Voronoi-math{1}-L{2}@{3}.png'.format(imp, sts, p, sd)
+		f = './images/Lp-{}agnostic-Voronoi-math{}-L{}@{}.png'.format(imp, sts, p, sd)
 		fdv.save(f, 'PNG')
 		fpv.close(); fdv.close()

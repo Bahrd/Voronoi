@@ -19,11 +19,11 @@ c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) 
 # Lp, for both p and q
 p, q, w = 2.0, 0.25, 0x100
 
-# The reference diagrams for p and q...
+# The reference diagrams for p and q... (extensions = ('PNG', 'PDF'))
 NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
 
 # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
-for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi_diagram(*NXY, w, *pq, c, sd)
+for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi_diagram(*NXY, w, *pq, c, sd, False)
 
 # ... a summary and fanfares!
 for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl)

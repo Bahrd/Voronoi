@@ -12,14 +12,14 @@ from numpy import arange
 from PIL import Image, ImageMath
 import os.path
 
-## Random random utilities...
-RRGB = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
-RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams
+## Random random utilities... [l:u:s]
+RRGB = lambda l = 0x0, u = 0x100, s = 0x10: [RA(l, u, s) for _ in range(0x3)]
+RBW = lambda l = 0x0, u = 0x100, s = 0x10: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams
 RRC = RBW if(0x1) else RRGB
 RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
 ## A pivotal yet elementary function...
-distanceLp = lambda x, y, p: pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p) if p > 0.0 else max(abs(x), abs(y))
+distanceLp = lambda x, y, p, w = 1.0: pow(pow(abs(x), p) + w * pow(abs(y), p), 1.0/p) if p > 0.0 else max(abs(x), abs(y))
 
 ## A decorative fun... See: https://www.geeksforgeeks.org/decorators-in-python/
 def ITT(f):
@@ -45,16 +45,17 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, extensions = ['
 	# ... cells
 	for y in range(w):
 		for x in range(w):
-			dmin, j = distanceLp(w - 1, w - 1, p), -1
+			s = 2.0 if p == 2.0 else 1.0
+			dmin, j = distanceLp(w - 1, w - 1, p, s), -1
 			for i in range(c):
-				d = distanceLp(nx[i] - x, ny[i] - y, p)
+				d = distanceLp(nx[i] - x, ny[i] - y, p, s)
 				if d < dmin:
 					dmin, j = d, i 
 			img[x, y] = nr[j], ng[j], nb[j]
 
 	for ext in extensions:
 		f = './images/Voronoi-L{}@{}.{}'.format(p, sd, ext)
-		image.save(f, ext, dpi = (72, 72))	
+		image.save(f, ext, dpi = (600, 600))	
 
 	return nx, ny
 @ITT
@@ -64,8 +65,10 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 	c = len(NX); nx, ny = [], c*NY
 	for n in range(c):
 		nx += c*[NX[n]]		
-	c *= len(NY);
-
+	c *= len(NY)
+	## add at point at random (off-grid x & y and off-grif y):
+	#nx, ny = list(nx) + [RA(w)],			list(ny) + [RA(w)]; c += 1			 
+	#nx, ny = list(nx) + [NX[RA(len(NX))]], list(ny) + [RA(w)]; c += 1  
 	# Set sites' classes from the image
 	f = './images/Voronoi-L{}@{}.png'.format(p, sd)
 	image = Image.open(f); img = image.load()
@@ -79,9 +82,10 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 	# ... cells
 	for y in range(w):
 		for x in range(w):
-			dmin, j = distanceLp(w - 1, w - 1, q), -1
+			s = 2.0 if q == 2.0 else 1.0
+			dmin, j = distanceLp(w - 1, w - 1, q, s), -1
 			for i in range(c):
-				d = distanceLp(nx[i] - x, ny[i] - y, q)
+				d = distanceLp(nx[i] - x, ny[i] - y, s, q)
 				if d < dmin:
 					dmin, j = d, i
 			img[x, y] = nr[j], ng[j], nb[j]
@@ -96,7 +100,7 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 			img[nx[i], ny[i]] = (0x00, 0xff, 0x00)
 	
 	for ext in extensions:
-		f = './images/Lp-agnostic-Voronoi-L{}@{}.{}'.format(p, sd, ext)
+		f = './images/Lp-agnostic-Voronoi-L{}L{}@{}.{}'.format(p, q, sd, ext)
 		image.save(f, ext, dpi = (72, 72))	
 
 @ITT

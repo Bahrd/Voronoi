@@ -14,17 +14,23 @@ from VoronoiUtilities import *
 
 ## Show time off!
 rsd = int(RA(0x12345678))
-c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
+c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) if len(argv) == 2 else (0x4, rsd)
 
+# Resolution... (length of a side of the square test-bed (in pixels))
+w = 0x100
 # Lp, for both p and q
-p, q, w = 2.0, 0.25, 0x100
+#for p in (2.0, 0.25, 1.0, 2.0, 4.0, 8.0):
+#   for q in (2.0, 0.25, 1.0, 2.0, 4.0, 8.0): 
+for p in [.25, 2.0]:
+   for q in [.25, 2.0]:         # The reference diagrams for p and q... (extensions = ('PNG', 'PDF'))
+        NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
+        # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
+        #for pq in ((p, q)):	
+        lp_agnostic_Voronoi_diagram(*NXY, w, p, q, c, sd, True)
 
-# The reference diagrams for p and q... (extensions = ('PNG', 'PDF'))
-NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
-
-# ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
-for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi_diagram(*NXY, w, *pq, c, sd, False)
-
-# ... a summary and fanfares!
+# ... a summary and fanfares! See: https://www.alt-codes.net/music_note_alt_codes.php 
+#                                  https://realpython.com/python-encodings-guide/#enter-unicode 
+# ♪ a.k.a. print(b'\xe2\x99\xaa'.decode('utf-8'), 'or \U0001D160, or \N{EIGHTH NOTE}') 
+# ♩        print(b'\xe2\x99\xa9'.decode('utf-8'), 'or \U0001D15F, or \N{Quarter note}')
 for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl)
 print('seed =', sd)

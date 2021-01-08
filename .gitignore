@@ -344,3 +344,4 @@ healthchecksdb
 /images/archives
 /images/examples
 /images
+*.txt

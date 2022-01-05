@@ -15,6 +15,7 @@ from os.path import isfile
 ## Random random utilities...
 RRGB = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
 RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams and s = 0x20 for others 
+#RBW = lambda l = 0x32, u = 0xd0, s = 0x96: [RA(l, u, s)] * 0x3 #if RA(0x10) > 1 else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams and s = 0x20 for others 
 RRC = RBW if(0x1) else RRGB                                    # ^red patches^
 RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
@@ -96,6 +97,23 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 
 	f = './images/Lp-agnostic-Voronoi-L{0}@{1}.png'.format(p, sd)
 	image.save(f, 'PNG')
+	if(1):
+		if(1):
+			px = [-1, 0, 1]
+			for dx in px:
+				for dy in px:
+					for i in range(c):
+						img[nx[i] + dx, ny[i] + dy] = (0xff, 0xff, 0xff)
+		px = [-2, -1, 0, 1, 2]
+		for dx in px:
+			for dy in px:
+				for i in range(len(NX)):
+					img[NX[i] + dx, NY[i] + dy] = (0xff, 0x0, 0x0)
+				#for i in range(len(ax)):
+				#	img[ax[i] + dx, ay[i] + dy] = (0xff, 0x00, 0x00) ## ALLY (0xff, 0xff, 0x00)
+	f = './images/Lp-agnostic-Voronoi-sites-L{0}@{1}.pdf'.format(p, sd)
+	image.save(f, 'pdf')
+
 @ITT
 def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False, lattice = False):
 
@@ -159,8 +177,10 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 				for i in range(len(ax)):
 					img[ax[i] + dx, ay[i] + dy] = (0xff, 0x00, 0x00) ## ALLY (0xff, 0xff, 0x00)
 		## ... and the lattice
-		f = './images/Lp-improved-agnostic-Voronoi-sites@{0}.png'.format(sd)
+		f = './images/Lp-improved-agnostic-Voronoi-sites@{0}.{1}'.format(sd, 'png')
 		image.save(f, 'PNG')
+		f = './images/Lp-improved-agnostic-Voronoi-sites@{0}.{1}'.format(sd, 'pdf')
+		image.save(f, 'PDF')
 
 def lp_agnostic_Voronoi_ps(p = 2, sd = 0x303, improved = False, sites = False, opr = 'abs(a - b)'):
 	imp, sts = 'improved-' if improved else '', '-sites' if sites else ''
@@ -174,4 +194,6 @@ def lp_agnostic_Voronoi_ps(p = 2, sd = 0x303, improved = False, sites = False, o
 								  for (ipb, iqb) in zip(fpv.split(), fav.split())])
 		f = './images/Lp-{0}agnostic-Voronoi-math{1}-L{2}@{3}.png'.format(imp, sts, p, sd)
 		fdv.save(f, 'PNG')
+		f = './images/Lp-{0}agnostic-Voronoi-math{1}-L{2}@{3}.pdf'.format(imp, sts, p, sd)
+		fdv.save(f, 'PDF')
 		fpv.close(); fdv.close()

@@ -6,6 +6,8 @@
 # 5. Generate o Voronoi diagram for these NxN sites
 # 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 is weird enough)
 
+## &"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\pyton.exe"
+
 from winsound import Beep as beep
 from random import randrange as RA, seed
 from sys import argv
@@ -17,13 +19,15 @@ rsd = int(RA(0x12345678))
 c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
 
 # Lp, for both p and q
-p, q, w = 2.0, 0.25, 0x100
+w = 0x100
+qs, ps = [.25] , [.25, 1.0, 2.0, 4.0] # (2.0, 0.25, 1.0, 2.0, 4.0, 8.0) ## extensions = ('PNG', 'PDF')
+for p in ps:
+   for q in qs: 
+        # The reference diagrams for p and q...
+        NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
 
-# The reference diagrams for p and q...
-NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
-
-# ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
-for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi_diagram(*NXY, w, *pq, c, sd)
+        # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
+        lp_agnostic_Voronoi_diagram(*NXY, w, p, q, c, sd)
 
 # ... a summary and fanfares!
 for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl)

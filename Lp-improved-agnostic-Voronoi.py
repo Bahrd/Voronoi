@@ -29,11 +29,11 @@ if(0b1):
 	# Make a difference
 	lp_agnostic_Voronoi_ps(p, sd); lp_agnostic_Voronoi_ps(q, sd)
 	# Compute the improved version for Lp
-	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x2, c, p, q, sd, sites = True, lattice = True)
-	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x2, c, q, p, sd, sites = True, lattice = True)
+	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, p, q, sd, sites = True, lattice = True)
+	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, q, p, sd, sites = True, lattice = True)
 
 if(0b1): #... # TODO: Make it nicer with sites
-	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x2, c, p, q, sd, sites = True, lattice = True)
+	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, p, q, sd, sites = True, lattice = True)
 	#lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, q, p, sd, sites = True, lattice = True)
 	#lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = True)
 	lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = True, sites = True, opr = '(a + 3*b)/4')

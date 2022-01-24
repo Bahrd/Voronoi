@@ -31,6 +31,41 @@ def ITT(f):
 		print('{0} evaluated in {1}s'.format(f.__name__, round(end - begin)))
 		return r
 	return time_warper_wrapper
+
+## A diagram with planted patterns
+## ...
+@ITT
+def lp_planted_Voronoi_diagram(patterns, w = 0x100, p = 2.0, sites = True):
+	image = Image.new("RGB", (w, w))
+	
+	nx, ny, nr, ng, nb = patterns
+	c = len(patterns[0])
+	##Drawing...
+	img = image.load()
+	# ... cells
+	for y in range(w):
+		for x in range(w):
+			dmin, j = distanceLp(w - 1, w - 1, p), -1
+			for i in range(c):
+				d = distanceLp(nx[i] - x, ny[i] - y, p)
+				if d < dmin:
+					dmin, j = d, i 
+			img[x, y] = nr[j], ng[j], nb[j]
+	if(not sites):
+		f = './images/Voronoi-L{0}@{1}.png'.format(p, 'planted')
+		image.save(f, 'PNG')
+
+	## ... sites
+	if(sites):
+		px = [-2, -1, 0, 1, 2]
+		for dx in px:
+			for dy in px:
+				for i in range(len(nx)):
+					img[nx[i] + dx, ny[i] + dy] = (0xff, 0xff, 0x0)
+		f = './images/Voronoi-sites-L{0}@{1}.png'.format(p, 'planted')
+		image.save(f, 'PNG')
+	return nx, ny
+
 ## Actual stuff... 
 @ITT
 def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):

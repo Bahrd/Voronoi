@@ -18,7 +18,7 @@ rsd = int(RA(0x12345678))
 c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
 
 # Lp, for p and q 
-p, q, w = 2.0, 0.25, 0x100
+p, q, w = 2.0, 2.0, 0x100
 # The reference diagrams for p and q...
 NXY, _ = lp_Voronoi_diagram(w, p, c, sd, True), lp_Voronoi_diagram(w, q, c, sd, True)
 # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
@@ -30,13 +30,14 @@ if(0b1):
 	lp_agnostic_Voronoi_ps(p, sd); lp_agnostic_Voronoi_ps(q, sd)
 	# Compute the improved version for Lp
 	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, p, q, sd, sites = True, lattice = True)
-	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, q, p, sd, sites = True, lattice = True)
+	#lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, q, p, sd, sites = True, lattice = True)
 
 if(0b1): #... # TODO: Make it nicer with sites
 	lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, p, q, sd, sites = True, lattice = True)
 	#lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, q, p, sd, sites = True, lattice = True)
 	#lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = True)
-	lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = True, sites = True, opr = '(a + 3*b)/4')
+	lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = False, sites = True)	# , opr = '(a + 3*b)/4')
+	lp_agnostic_Voronoi_ps(p = p, sd = sd, improved = True, sites = True)	# , opr = '(a + 3*b)/4')
 
 # ... a summary and fanfares!
 for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl)

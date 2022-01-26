@@ -1,10 +1,10 @@
-﻿## The Lp agnostic 1-NN algorithm illustration
+﻿## The Lp agnostic 1-NN algorithm illustration [Project «⅄⅃LY»]
 # 1. Generate N random sites inside a square
 # 2. Create the Voronoi's diagram for Lp, 0 < p ≤ 2 (p = 2.0 is somehow distingushed)
 # 3. Create a lattice of N(N - 1) sites for the generated N random ones
 # 4. Associate the new N(N - 1) sites to the classes accordingly to the diagram for the selected Lp
-# 5. Generate o Voronoi diagram for these NxN sites
-# 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 is weird enough)
+# 5. Generate o Voronoi diagram for these NxN sites (effectively, an NxN Hanan grid)
+# 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 seems counterintuitive enough)
 
 from time import time as TT
 from random import randrange as RA, seed
@@ -32,12 +32,20 @@ def ITT(f):
 		return r
 	return time_warper_wrapper
 
-## A diagram with planted patterns
+## A diagram with planted on a Hanan grid pattern seeds
 ## ...
 @ITT
-def lp_planted_Voronoi_diagram(patterns, w = 0x100, p = 2.0, sites = True):
+def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = True):
+	seed(sd) # Controlled randomness to get a better picture of the phenomenon
+	         # ♫ Choking on the bad, bad, bad, bad, bad, bad seed ♫
 	image = Image.new("RGB", (w, w))
-	
+	# Fixed (action?) patterns
+	#patterns = [[0x60, 0x60, 0xb0, 0xb0, 0xb0], [0x60, 0xb0, 0x64, 0x60, 0xb0], 
+	#            [0xff, 0xff, 0, 0x80, 0], [0, 0xff, 0, 0x80, 0], [0, 0xff, 0, 0x80, 0]]
+	# Random Hanan grid with a new non-grid pattern
+	stp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]
+	patterns = [[stp[0], stp[0], stp[1], stp[1], stp[1] if Hanan else RA(w)], [stp[1], stp[0], stp[1], stp[0], stp[1]], 
+				[0xff, 0xf0, 0, 0x80, 0], [0, 0xf0, 0, 0x80, 0], [0, 0xf0, 0, 0x80, 0]]
 	nx, ny, nr, ng, nb = patterns
 	c = len(patterns[0])
 	##Drawing...
@@ -52,7 +60,7 @@ def lp_planted_Voronoi_diagram(patterns, w = 0x100, p = 2.0, sites = True):
 					dmin, j = d, i 
 			img[x, y] = nr[j], ng[j], nb[j]
 	if(not sites):
-		f = './images/Voronoi-L{0}@{1}.png'.format(p, 'planted')
+		f = './images/Voronoi-planted-L{0}@{1}.png'.format(p, sd)
 		image.save(f, 'PNG')
 
 	## ... sites
@@ -62,7 +70,7 @@ def lp_planted_Voronoi_diagram(patterns, w = 0x100, p = 2.0, sites = True):
 			for dy in px:
 				for i in range(len(nx)):
 					img[nx[i] + dx, ny[i] + dy] = (0xff, 0xff, 0x0)
-		f = './images/Voronoi-sites-L{0}@{1}.png'.format(p, 'planted')
+		f = './images/Voronoi-planted-sites-L{0}@{1}.png'.format(p, sd)
 		image.save(f, 'PNG')
 	return nx, ny
 
@@ -88,8 +96,9 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
 					dmin, j = d, i 
 			img[x, y] = nr[j], ng[j], nb[j]
 
-	f = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
-	image.save(f, 'PNG')
+	f = './images/Voronoi-L{0}@{1}'.format(p, sd)
+	image.save(f + '.png', 'PNG')
+	image.save(f + '.pdf', 'PDF')
 
 	## ... sites
 	if(sites):
@@ -97,9 +106,10 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
 		for dx in px:
 			for dy in px:
 				for i in range(len(nx)):
-					img[nx[i] + dx, ny[i] + dy] = (0xff, 0x0, 0x0)
-		f = './images/Voronoi-sites-L{0}@{1}.png'.format(p, sd)
-		image.save(f, 'PNG')
+					img[nx[i] + dx, ny[i] + dy] = (0xff, 0xff, 0x0)
+		f = './images/Voronoi-sites-L{0}@{1}'.format(p, sd)
+		image.save(f + '.png', 'PNG')
+		image.save(f + '.pdf', 'PDF')
 	return nx, ny
 @ITT
 def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, sd = 0x303):
@@ -130,8 +140,9 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 					dmin, j = d, i
 			img[x, y] = nr[j], ng[j], nb[j]
 
-	f = './images/Lp-agnostic-Voronoi-L{0}@{1}.png'.format(p, sd)
-	image.save(f, 'PNG')
+	f = './images/Lp-agnostic-Voronoi-L{0}@{1}'.format(p, sd)
+	image.save(f + '.png', 'PNG')
+	image.save(f + '.pdf', 'PDF')
 	if(1):
 		if(1):
 			px = [-1, 0, 1]
@@ -143,7 +154,7 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 		for dx in px:
 			for dy in px:
 				for i in range(len(NX)):
-					img[NX[i] + dx, NY[i] + dy] = (0xff, 0x0, 0x0)
+					img[NX[i] + dx, NY[i] + dy] = (0xff, 0xff, 0x0)
 				#for i in range(len(ax)):
 				#	img[ax[i] + dx, ay[i] + dy] = (0xff, 0x00, 0x00) ## ALLY (0xff, 0xff, 0x00)
 	f = './images/Lp-agnostic-Voronoi-sites-L{0}@{1}.pdf'.format(p, sd)
@@ -155,7 +166,7 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 	## Generate extra sites for extra precision (in locations
 	# where the classifications differ for Lp and for agnostic-Lp).
 ##ALLY
-	f = './images/Lp-agnostic-Voronoi-math-L{0}@{1}.png'.format(p, sd)
+	f = './images/Agnostic-Voronoi-math-L{}@{}.png'.format(p, sd)
 	image = Image.open(f); img = image.load()
 	w = image.size[0]
 	#seed(TT())
@@ -194,8 +205,9 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 					dmin, j = d, i
 			img[x, y] = nr[j], ng[j], nb[j]
 
-	f = './images/Lp-improved-agnostic-Voronoi-L{0}@{1}.png'.format(p, sd)
-	image.save(f, 'PNG'); #image.show()
+	f = './images/Lp-improved-agnostic-Voronoi-L{0}@{1}'.format(p, sd)
+	image.save(f + '.png', 'PNG')
+	image.save(f + '.pdf', 'PDF')
 	## ... sites
 	if(sites):
 		if(lattice):
@@ -208,27 +220,32 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 		for dx in px:
 			for dy in px:
 				for i in range(len(NX)):
-					img[NX[i] + dx, NY[i] + dy] = (0xff, 0x0, 0x0)
+					img[NX[i] + dx, NY[i] + dy] = (0xff, 0xff, 0x0)
+		px = [-3, -2, -1, 0, 1, 2, 3]
+		for dx in px:
+			for dy in px:
 				for i in range(len(ax)):
-					img[ax[i] + dx, ay[i] + dy] = (0xff, 0x00, 0x00) ## ALLY (0xff, 0xff, 0x00)
+					img[ax[i] + dx, ay[i] + dy] = (0xff, 0x00, 0x00) 
 		## ... and the lattice
 		f = './images/Lp-improved-agnostic-Voronoi-sites@{0}.{1}'.format(sd, 'png')
 		image.save(f, 'PNG')
 		f = './images/Lp-improved-agnostic-Voronoi-sites@{0}.{1}'.format(sd, 'pdf')
 		image.save(f, 'PDF')
 
+
+## Pre-release version
 def lp_agnostic_Voronoi_ps(p = 2, sd = 0x303, improved = False, sites = False, opr = 'abs(a - b)'):
-	imp, sts = 'improved-' if improved else '', '-sites' if sites else ''
-	
-	fa = './images/Lp-{0}agnostic-Voronoi{1}-L{2}@{3}.png'.format(imp, sts, p, sd)
+	fa = './images/Lp-{}agnostic-Voronoi-L{}@{}.png'.format('improved-' if improved else '', p, sd)
 	if(isfile(fa)):
-		fp = './images/Voronoi-L{0}@{1}.png'.format(p, sd)
+		fp = './images/Voronoi-L{}@{}.png'.format(p, sd)
 		fav, fpv = Image.open(fa), Image.open(fp); fdv = Image.new('RGB', fpv.size)
 		#ImageMath doesn't process RGB images (yet)...
 		fdv = Image.merge('RGB', [ImageMath.eval('convert({0}, "L")'.format(opr), a = ipb, b = iqb) \
 								  for (ipb, iqb) in zip(fpv.split(), fav.split())])
-		f = './images/Lp-{0}agnostic-Voronoi-math{1}-L{2}@{3}.png'.format(imp, sts, p, sd)
+		f = './images/Agnostic-{}Voronoi-math-L{}@{}.png'.format('improved-' if improved else '', p, sd)
 		fdv.save(f, 'PNG')
-		f = './images/Lp-{0}agnostic-Voronoi-math{1}-L{2}@{3}.pdf'.format(imp, sts, p, sd)
+		f = './images/Agnostic-{}Voronoi-math-L{}@{}.pdf'.format('improved-' if improved else '', p, sd)
 		fdv.save(f, 'PDF')
 		fpv.close(); fdv.close()
+	else:
+		print('File: [{}] not found!'.format(fa))

@@ -6,7 +6,7 @@
 # 5. Generate o Voronoi diagram for these NxN sites (effectively, an NxN Hanan grid)
 # 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 seems counterintuitive enough)
 
-## &"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\pyton.exe" - YPMV (Your Python May Vary)
+## &"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\python.exe" - YPMV (Your Python May Vary)
 ## .\Lp-agnostic-Voronoi.py 8 98828880 - used in the IEEE article
 
 from winsound import Beep as beep

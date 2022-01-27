@@ -12,20 +12,26 @@ from numpy import arange
 from PIL import Image, ImageMath
 from os.path import isfile
 
-## Random random utilities...
-RRGB = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
-RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams and s = 0x20 for others 
-#RBW = lambda l = 0x32, u = 0xd0, s = 0x96: [RA(l, u, s)] * 0x3 #if RA(0x10) > 1 else (0xff, 0x0, 0x0) # s = 0x96 for binary B&W diagrams and s = 0x20 for others 
-RRC = RBW if(0x1) else RRGB                                    # ^red patches^
-RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
-
+## Colors...
 c_red, c_green, c_blue, c_yellow, c_black, c_gray, c_white = ((0xff, 0, 0), (0, 0xff, 0), (0, 0, 0xff), (0xff, 0xff, 0),
 															  (0, 0, 0), (0x80, 0x80, 0x80), (0xff, 0xff, 0xff))
 
-## A pivotal yet elementary function...
-distanceLp = lambda x, y, p: pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p) if p > 0.0 else max(abs(x), abs(y))
+## Random random utilities... (s = 0x96 for binary B&W diagrams and s = 0x20 for others)
+RRGB = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
+RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else c_red 
+RRC = RBW if(0x1) else RRGB                                    # ^red patches^
+RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
-## A decorative fun... See: https://www.geeksforgeeks.org/decorators-in-python/
+## ... and a usefull pack of functions... (any p < 0 represents p = ∞, p == 0 corresponds to Hamming distance)
+def lp_length(x, y, p): 
+	if(p > 0.0):
+		return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p)
+	elif(p == 0.0):
+		return int(x != 0) + int(y != 0)
+	else:
+		return max(abs(x), abs(y))
+
+## ... with a decorative fun... See: https://www.geeksforgeeks.org/decorators-in-python/
 def ITT(f):
 	def time_warper_wrapper(*args, **kwargs): 
 		begin = TT() # from time import time as TT
@@ -35,8 +41,9 @@ def ITT(f):
 		return r
 	return time_warper_wrapper
 
-## A diagram with planted on a Hanan grid pattern seeds
-## ...
+
+### Actual diagram generators
+## A diagram of seeds planted on a Hanan grid
 @ITT
 def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = True):
 	seed(sd) # Controlled randomness to get a better picture of the phenomenon
@@ -47,21 +54,21 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = Tr
 	#            [0xff, 0xff, 0, 0x80, 0], [0, 0xff, 0, 0x80, 0], [0, 0xff, 0, 0x80, 0]]
 	# Random Hanan grid with a new non-grid pattern
 	pp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]
-	patterns =  [[pp[0], pp[0]], [pp[0], pp[1]], 
-				 [pp[1], pp[0]], [pp[1], pp[1]]]
-	patterns += [[pp[1], pp[0] if Hanan else RA(w)]]
+	planted_pattern =  [[pp[0], pp[0]], [pp[0], pp[1]], 
+						[pp[1], pp[0]], [pp[1], pp[1]]]
+	planted_pattern += [[pp[1], pp[0] if Hanan else RA(w)]]
 	colors = [c_black, c_white, c_gray, c_red, c_red]
 
-	(nx, ny), (nr, ng, nb) = list(zip(*patterns)), list(zip(*colors))
+	(nx, ny), (nr, ng, nb) = zip(*planted_pattern), zip(*colors)
 	##Drawing...
 	img = image.load()
 	# ... cells
 	c = len(colors)
 	for y in range(w):
 		for x in range(w):
-			dmin, j = distanceLp(w - 1, w - 1, p), -1
+			dmin, j = lp_length(w - 1, w - 1, p), -1
 			for i in range(c):
-				d = distanceLp(nx[i] - x, ny[i] - y, p)
+				d = lp_length(nx[i] - x, ny[i] - y, p)
 				if d < dmin:
 					dmin, j = d, i 
 			img[x, y] = nr[j], ng[j], nb[j]
@@ -89,15 +96,15 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
 	# Just a standard random case... # Black (, red) & white...
 
 	nxy, nrgb = zip(*[(RXY(w), RRC(0x0, 0x100)) for _ in range(c)])
-	nx, ny = zip(*nxy); nr, ng, nb = zip(*nrgb)
+	(nx, ny), (nr, ng, nb) = zip(*nxy), zip(*nrgb)
 	##Drawing...
 	img = image.load()
 	# ... cells
 	for y in range(w):
 		for x in range(w):
-			dmin, j = distanceLp(w - 1, w - 1, p), -1
+			dmin, j = lp_length(w - 1, w - 1, p), -1
 			for i in range(c):
-				d = distanceLp(nx[i] - x, ny[i] - y, p)
+				d = lp_length(nx[i] - x, ny[i] - y, p)
 				if d < dmin:
 					dmin, j = d, i 
 			img[x, y] = nr[j], ng[j], nb[j]
@@ -137,9 +144,9 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 	# ... cells
 	for y in range(w):
 		for x in range(w):
-			dmin, j = distanceLp(w - 1, w - 1, q), -1
+			dmin, j = lp_length(w - 1, w - 1, q), -1
 			for i in range(c):
-				d = distanceLp(nx[i] - x, ny[i] - y, q)
+				d = lp_length(nx[i] - x, ny[i] - y, q)
 				if d < dmin:
 					dmin, j = d, i
 			img[x, y] = nr[j], ng[j], nb[j]
@@ -199,9 +206,9 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 	# ... cells
 	for y in range(w):
 		for x in range(w):
-			dmin, j = distanceLp(w - 1, w - 1, q), -1
+			dmin, j = lp_length(w - 1, w - 1, q), -1
 			for i in range(c):
-				d = distanceLp(nx[i] - x, ny[i] - y, q)
+				d = lp_length(nx[i] - x, ny[i] - y, q)
 				if d < dmin:
 					dmin, j = d, i
 			img[x, y] = nr[j], ng[j], nb[j]

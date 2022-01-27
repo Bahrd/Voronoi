@@ -8,7 +8,7 @@
 # 7. In order to (supposedly) improve approximation quality one can add a new (set of) 
 #    site(s) in the arbitrary position(s), together with the accompanying lattice points.
 
-## &"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\pyton.exe" \Lp-improved-agnostic-Voronoi.py
+## &"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\python.exe" .\Lp-improved-agnostic-Voronoi.py
 #    YPMV (Your Path May Vary)
 
 from winsound import Beep as beep

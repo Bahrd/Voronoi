@@ -9,6 +9,7 @@
 from time import time as TT
 from random import randrange as RA, seed
 from numpy import arange
+from math import sqrt
 from PIL import Image, ImageMath
 from os.path import isfile
 
@@ -22,14 +23,20 @@ RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 e
 RRC = RBW if(0x1) else RRGB                                    # ^red patches^
 RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
-## ... and a usefull pack of functions... (any p < 0 represents p = ∞, p == 0 corresponds to Hamming distance)
+inf = float('inf')
+dictum_acerbum = {
+					0.0: lambda x, y: int(x != 0.0) + int(y != 0.0),		# p == 0, the Hamming distance
+					0.5: lambda x, y: (sqrt(abs(x)) + sqrt(abs(y)))**2.0,	# a hand-crafted optimization
+					1.0: lambda x, y: abs(x) + abs(y),						# p == 1, the taxi-cab metric (Manhattan distance) 
+					2.0: lambda x, y: sqrt(x**2.0 + y**2.0),				# p == 2, the good ol' Euclid
+					inf: lambda x, y: max(abs(x), abs(y))		
+				 }
+## ... and an lp-distance function implementation ... 
 def lp_length(x, y, p): 
-	if(p > 0.0):
-		return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p)
-	elif(p == 0.0):
-		return int(x != 0) + int(y != 0)
-	else:
-		return max(abs(x), abs(y))
+	try:
+		return dictum_acerbum[p](x, y)										# branch-less programming ;)
+	except KeyError:
+		return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p)	
 
 ## ... with a decorative fun... See: https://www.geeksforgeeks.org/decorators-in-python/
 def ITT(f):
@@ -40,7 +47,6 @@ def ITT(f):
 		print('{0} evaluated in {1}s'.format(f.__name__, round(end - begin)))
 		return r
 	return time_warper_wrapper
-
 
 ### Actual diagram generators
 ## A diagram of seeds planted on a Hanan grid
@@ -86,7 +92,6 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = Tr
 		f = './images/Voronoi-planted-sites-L{0}@{1}'.format(p, sd)
 		image.save(f + '.png', 'PNG')
 	return nx, ny
-
 ## Actual stuff... 
 @ITT
 def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
@@ -167,7 +172,6 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 					img[NX[i] + dx, NY[i] + dy] = c_yellow
 	f = './images/Lp-agnostic-Voronoi-sites-L{0}@{1}'.format(p, sd)
 	image.save(f + '.pdf', 'pdf')
-
 @ITT
 def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False, lattice = False):
 
@@ -236,8 +240,6 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 		## ... and the lattice
 		f = './images/Lp-improved-agnostic-Voronoi-sites@{}'.format(sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
-
-
 ## Pre-release version
 def lp_agnostic_Voronoi_ps(p = 2, sd = 0x303, improved = False, sites = False, opr = 'abs(a - b)'):
 	fa = './images/Lp-{}agnostic-Voronoi-L{}@{}.png'.format('improved-' if improved else '', p, sd)

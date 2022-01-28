@@ -9,7 +9,7 @@
 from time import time as TT
 from random import randrange as RA, seed
 from numpy import arange
-from math import sqrt
+from math import sqrt, inf
 from PIL import Image, ImageMath
 from os.path import isfile
 
@@ -23,20 +23,15 @@ RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 e
 RRC = RBW if(0x1) else RRGB                                    # ^red patches^
 RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
-inf = float('inf')
-dictum_acerbum = {
-					0.0: lambda x, y: int(x != 0.0) + int(y != 0.0),		# p == 0, the Hamming distance
+## ... and an lp-distance function implementation... See: https://www.geeksforgeeks.org/python-infinity/
+dictum_acerbum = {	0.0: lambda x, y: int(x != 0.0) + int(y != 0.0),		# p == 0, the Hamming distance
 					0.5: lambda x, y: (sqrt(abs(x)) + sqrt(abs(y)))**2.0,	# a hand-crafted optimization
 					1.0: lambda x, y: abs(x) + abs(y),						# p == 1, the taxi-cab metric (Manhattan distance) 
 					2.0: lambda x, y: sqrt(x**2.0 + y**2.0),				# p == 2, the good ol' Euclid
-					inf: lambda x, y: max(abs(x), abs(y))		
-				 }
-## ... and an lp-distance function implementation ... 
+					inf: lambda x, y: max(abs(x), abs(y))}					# p == ∞, the max metric
 def lp_length(x, y, p): 
-	try:
-		return dictum_acerbum[p](x, y)										# branch-less programming ;)
-	except KeyError:
-		return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p)	
+	try:				return dictum_acerbum[p](x, y)						# branch-less programming ;)
+	except KeyError:	return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p)	
 
 ## ... with a decorative fun... See: https://www.geeksforgeeks.org/decorators-in-python/
 def ITT(f):

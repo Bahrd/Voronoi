@@ -28,7 +28,7 @@ for p in ps:
         #_ = lp_planted_Voronoi_diagram(sd, w, p, Hanan = False, sites = True)
 
         # The reference diagrams for p and q...
-        NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
+        NXY, _ = lp_Voronoi_diagram(w, p, c, sd, sites = False), lp_Voronoi_diagram(w, q, c, sd, sites = False)
         # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
         _ = lp_agnostic_Voronoi_diagram(*NXY, w, p, q, c, sd)
         # ... and the sets of patterns with different decisions

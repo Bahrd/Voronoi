@@ -21,18 +21,19 @@ c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) 
 
 # Lp, for both p and q
 w, Hanan = 0x100, True
-qs, ps = [.25], [.25, 0.5, 1.0, 2.0, 4.0] # (2.0, 0.25, 1.0, 2.0, 4.0, 8.0) ## extensions = ('PNG', 'PDF')
+qs, ps = [2.0], [.25, 0.5, 1.0, 2.0, 4.0] # (2.0, 0.25, 1.0, 2.0, 4.0, 8.0) ## extensions = ('PNG', 'PDF')
 for p in ps:
    for q in qs: 
         ## The diagrams for p and q and ...
-        _ = lp_planted_Voronoi_diagram(sd, w, p, Hanan = False, sites = True)
+        #_ = lp_planted_Voronoi_diagram(sd, w, p, Hanan = False, sites = True)
 
         # The reference diagrams for p and q...
         NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
         # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
         _ = lp_agnostic_Voronoi_diagram(*NXY, w, p, q, c, sd)
+        # ... and the sets of patterns with different decisions
         _ = lp_agnostic_Voronoi_ps(p, sd)
 
-# ... a summary and fanfares!
+# ... a summary (in a nutshell) and fanfares!
 for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl)
 print('seed =', sd)

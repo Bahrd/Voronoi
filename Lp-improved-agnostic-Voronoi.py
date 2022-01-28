@@ -24,7 +24,7 @@ c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) 
 # Lp, for p and q 
 p, q, w = 2.0, 1.0, 0x100
 # The reference diagrams for p and q...
-NXY, _ = lp_Voronoi_diagram(w, p, c, sd, True), lp_Voronoi_diagram(w, q, c, sd, True)
+NXY, _ = lp_Voronoi_diagram(w, p, c, sd, sites = False), lp_Voronoi_diagram(w, q, c, sd, sites = False)
 # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
 for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi_diagram(*NXY, w, *pq, c, sd)
 

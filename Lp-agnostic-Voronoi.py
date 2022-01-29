@@ -4,7 +4,7 @@
 # 3. Complement N patterns with a lattice of N × (N - 1) patterns to get a Hanan grid
 # 4. Associate the new N × (N - 1) patterns to the classes w.r.t. the selected Lp
 # 5. Generate o Voronoi diagram for these N × N patterns (effectively, for the N × N Hanan grid)
-# 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 seems counterintuitive enough)
+# 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 seems arbitrary enough)
 
 ## &"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\python.exe" - YPMV (Your Python May Vary)
 ## .\Lp-agnostic-Voronoi.py 8 98828880 - used in the IEEE article

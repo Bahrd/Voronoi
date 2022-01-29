@@ -1,9 +1,9 @@
 ﻿## The Lp agnostic 1-NN algorithm illustration [Project «⅄⅃LY»]
-# 1. Generate N random sites inside a square
+# 1. Generate N random patterns inside a square
 # 2. Create the Voronoi's diagram for Lp, 0 < p ≤ 2 (p = 2.0 is somehow distingushed)
-# 3. Complement N sites with a lattice of N(N - 1) sites to get a Hanan grid
-# 4. Associate the new N(N - 1) sites to the classes accordingly to the diagram for the selected Lp
-# 5. Generate o Voronoi diagram for these NxN sites (effectively, an NxN Hanan grid)
+# 3. Complement N patterns with a lattice of N × (N - 1) patterns to get a Hanan grid
+# 4. Associate the new N × (N - 1) patterns to the classes w.r.t. the selected Lp
+# 5. Generate o Voronoi diagram for these N × N patterns (effectively, for the N × N Hanan grid)
 # 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 seems counterintuitive enough)
 
 from time import time as TT
@@ -24,13 +24,13 @@ RRC = RBW if(0x1) else RRGB                                    # ^red patches^
 RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
 ## ... and an lp-distance function implementation... See: https://www.geeksforgeeks.org/python-infinity/
-dictum_acerbum = {	0.0: lambda x, y: int(x != 0.0) + int(y != 0.0),		# p == 0, the Hamming distance
-					0.5: lambda x, y: (sqrt(abs(x)) + sqrt(abs(y)))**2.0,	# a hand-crafted optimization
-					1.0: lambda x, y: abs(x) + abs(y),						# p == 1, the taxi-cab metric (Manhattan distance) 
-					2.0: lambda x, y: sqrt(x**2.0 + y**2.0),				# p == 2, the good ol' Euclid
-					inf: lambda x, y: max(abs(x), abs(y))}					# p == ∞, the max metric
+dictum_acerbum = {	0.0: lambda x, y: int(x != 0.0) + int(y != 0.0),		# p == 0.0, the Hamming distance
+					0.5: lambda x, y: (sqrt(abs(x)) + sqrt(abs(y)))**2.0,	# p == 0.5, hand-crafted optimization
+					1.0: lambda x, y: abs(x) + abs(y),						# p == 1.0, the taxi-cab metric (Manhattan distance) 
+					2.0: lambda x, y: sqrt(x**2.0 + y**2.0),				# p == 2.0, the good ol' Euclid
+					inf: lambda x, y: max(abs(x), abs(y))}					# p ==  ∞,  the max metric
 def lp_length(x, y, p): 
-	try:				return dictum_acerbum[p](x, y)						# branch-less programming ;)
+	try:				return dictum_acerbum[p](x, y)						# kinda branch-less programming ;)
 	except KeyError:	return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p)	
 
 ## ... with a decorative fun... See: https://www.geeksforgeeks.org/decorators-in-python/
@@ -43,21 +43,17 @@ def ITT(f):
 		return r
 	return time_warper_wrapper
 
-### Actual diagram generators
-## A diagram of seeds planted on a Hanan grid
+### 2D diagram generators (based on https://rosettacode.org/wiki/Voronoi_diagram#Python)
+##  A diagram of seeds (patterns) planted on a Hanan grid
 @ITT
 def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = True):
 	seed(sd) # Controlled randomness to get a better picture of the phenomenon
-	         # ♫ Choking on the bad, bad, bad, bad, bad, bad seed ♫
+	         # ♫ Choking on the bad, bad, bad, bad, bad, bad seed! ♫
 	image = Image.new("RGB", (w, w))
-	# Fixed (action?) patterns
-	#patterns = [[0x60, 0x60, 0xb0, 0xb0, 0xb0], [0x60, 0xb0, 0x64, 0x60, 0xb0], 
-	#            [0xff, 0xff, 0, 0x80, 0], [0, 0xff, 0, 0x80, 0], [0, 0xff, 0, 0x80, 0]]
-	# Random Hanan grid with a new non-grid pattern
 	pp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]
-	planted_pattern =  [[pp[0], pp[0]], [pp[0], pp[1]], 
-						[pp[1], pp[0]], [pp[1], pp[1]]]
-	planted_pattern += [[pp[1], pp[0] if Hanan else RA(w)]]
+	# ♫ We're gonna have to reap from some seed that's been sowed... ♫
+	planted_pattern =  [[pp[0], pp[0]], [pp[0], pp[1]], [pp[1], pp[0]], [pp[1], pp[1]]] # on-grid patterns
+	planted_pattern += [[pp[1], pp[0] if Hanan else RA(w)]]								# a random pattern
 	colors = [c_black, c_white, c_gray, c_red, c_red]
 
 	(nx, ny), (nr, ng, nb) = zip(*planted_pattern), zip(*colors)
@@ -87,7 +83,8 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = Tr
 		f = './images/Voronoi-planted-sites-L{0}@{1}'.format(p, sd)
 		image.save(f + '.png', 'PNG')
 	return nx, ny
-## Actual stuff... 
+
+## Working stuff... 
 @ITT
 def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
 	seed(sd) # Controlled randomness to get the same points for various p
@@ -122,16 +119,17 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
 		f = './images/Voronoi-sites-L{0}@{1}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	return nx, ny
+
 @ITT
 def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, sd = 0x303):
-	# Generate N(N-1) additional sites to form an NxN lattice
-	# ... and extra sites as well
+	# Generate N × (N-1) additional patterns to form an N × N lattice (Hanan grid)
+	# ... and extra patterns as well
 	c = len(NX); nx, ny = [], c*NY
 	for n in range(c):
 		nx += c*[NX[n]]		
 	c *= len(NY);
 
-	# Set sites' classes from the image
+	# Set pattern's classes from the image
 	f = './images/Voronoi-L{0}@{1}'.format(p, sd)
 	image = Image.open(f + '.png'); img = image.load()
 	w = image.size[0]
@@ -167,13 +165,14 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 					img[NX[i] + dx, NY[i] + dy] = c_yellow
 	f = './images/Lp-agnostic-Voronoi-sites-L{0}@{1}'.format(p, sd)
 	image.save(f + '.png', 'png'); image.save(f + '.pdf', 'pdf')
+
 @ITT
 def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False, lattice = False):
 
-	## Generate extra sites for extra precision (in locations
-	# where the classifications differ for Lp and for agnostic-Lp).
+	## Generate extra patterns for extra precision (in locations
+	#   where the classifications differ for Lp and for agnostic-Lp).
 ##ALLY
-	f = './images/Agnostic-Voronoi-math-L{}@{}'.format(p, sd)
+	f = './images/agnostic-Voronoi-math-L{}@{}'.format(p, sd)
 	image = Image.open(f + '.png'); img = image.load()
 	w = image.size[0]
 	#seed(TT())
@@ -185,14 +184,14 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 	image.close()
 	NX += tuple(ax); NY += tuple(ay)
 ##ALLY
-	# Generate N(N-1) additional sites to form an NxN lattice
-	# ... and extra sites as well
+	# Generate N × (N-1) additional patterns to form an N × N lattice (Hanan grid)
+	# ... and some extra patterns as well
 	c = len(NX); nx, ny = [], c*NY
 	for n in range(c):
 		nx += c*[NX[n]]		
 	c *= len(NY);
 
-	# Set sites' classes from the image
+	# Set pattern's classes from the image
 	f = './images/Voronoi-L{0}@{1}'.format(p, sd)
 	image = Image.open(f + '.png'); img = image.load()
 	w = image.size[0]
@@ -235,17 +234,17 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 		## ... and the lattice
 		f = './images/Lp-improved-agnostic-Voronoi-sites@{}'.format(sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
-## Pre-release version
+
+## Perform an 'opr' on diagrams (a difference in particular, when opr = 'abs(a - b)'
 def lp_agnostic_Voronoi_ps(p = 2, sd = 0x303, improved = False, sites = False, opr = 'abs(a - b)'):
 	fa = './images/Lp-{}agnostic-Voronoi-L{}@{}.png'.format('improved-' if improved else '', p, sd)
 	if(isfile(fa)):
 		fp = './images/Voronoi-L{}@{}.png'.format(p, sd)
 		fav, fpv = Image.open(fa), Image.open(fp); fdv = Image.new('RGB', fpv.size)
-		#ImageMath doesn't process RGB images (yet)...
+		#ImageMath doesn't process RGB images (at the time of writing this code)...
 		fdv = Image.merge('RGB', [ImageMath.eval('convert({0}, "L")'.format(opr), a = ipb, b = iqb) \
 								  for (ipb, iqb) in zip(fpv.split(), fav.split())])
-		f = './images/Agnostic-{}Voronoi-math-L{}@{}'.format('improved-' if improved else '', p, sd)
+		f = './images/agnostic-{}Voronoi-math-L{}@{}'.format('improved-' if improved else '', p, sd)
 		fdv.save(f + '.png', 'PNG'); fdv.save(f + '.pdf', 'PDF')
-		fpv.close(); fdv.close()
 	else:
 		print('File: [{}] not found!'.format(fa))

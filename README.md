@@ -13,3 +13,5 @@ See exemplary Voronoi diagrams for *p = 1/4* and *p = 2* and the same set *S<sub
 and the *L<sub>p</sub>*-agnostic Hanan-grid approximations for *p = 2*
 
 ![Lq-agnostic](./samples/2A.png) ![Lq-agnostic&improved](./samples/2AI.png)
+
+# «⅄⅃LY»

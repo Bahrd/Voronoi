@@ -71,7 +71,7 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = Tr
 			img[x, y] = nr[j], ng[j], nb[j]
 	if(not sites):
 		f = './images/Voronoi-planted-L{0}@{1}'.format(p, sd)
-		image.save(f + '.png', 'PNG')
+		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 
 	## ... sites
 	if(sites):
@@ -81,7 +81,7 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = Tr
 				for i in range(len(nx)):
 					img[nx[i] + dx, ny[i] + dy] = c_yellow
 		f = './images/Voronoi-planted-sites-L{0}@{1}'.format(p, sd)
-		image.save(f + '.png', 'PNG')
+		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	return nx, ny
 
 ## Working stuff... 

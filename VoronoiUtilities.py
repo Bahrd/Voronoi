@@ -14,8 +14,10 @@ from PIL import Image, ImageMath
 from os.path import isfile
 
 ## Colors...
-c_red, c_green, c_blue, c_yellow, c_black, c_gray, c_white = ((0xff, 0, 0), (0, 0xff, 0), (0, 0, 0xff), (0xff, 0xff, 0),
-															  (0, 0, 0), (0x80, 0x80, 0x80), (0xff, 0xff, 0xff))
+c_red, c_green, c_blue, c_yellow, c_black, c_gray, c_whitish, c_white = ((0xff, 0, 0), (0, 0xff, 0), 
+																		 (0, 0, 0xff), (0xff, 0xff, 0),
+																		 (0, 0, 0), (0x80, 0x80, 0x80), 
+																		 (0xdd, 0xdd, 0xdd), (0xff, 0xff, 0xff))
 
 ## Random random utilities... (s = 0x96 for binary B&W diagrams and s = 0x20 for others)
 RRGB = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
@@ -54,7 +56,7 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = Tr
 	# ♫ We're gonna have to reap from some seed that's been sowed... ♫
 	planted_pattern =  [[pp[0], pp[0]], [pp[0], pp[1]], [pp[1], pp[0]], [pp[1], pp[1]]] # on-grid patterns
 	planted_pattern += [[pp[1], pp[0] if Hanan else RA(w)]]								# a random pattern
-	colors = [c_black, c_white, c_gray, c_red, c_red]
+	colors = [c_red, c_whitish, c_gray, c_black, c_black]
 
 	(nx, ny), (nr, ng, nb) = zip(*planted_pattern), zip(*colors)
 	##Drawing...

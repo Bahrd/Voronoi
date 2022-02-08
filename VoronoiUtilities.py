@@ -1,7 +1,7 @@
 ﻿## The Lp agnostic 1-NN algorithm illustration [Project «⅄⅃LY»]
 # 1. Generate N random patterns inside a square
 # 2. Create the Voronoi's diagram for Lp, 0 < p ≤ 2 (p = 2.0 is somehow distingushed)
-# 3. Complement N patterns with a lattice of N × (N - 1) patterns to get a Hanan grid
+# 3. Compute an N × N Cartesian product of pattern's coordinates to get a Hanan grid
 # 4. Associate the new N × (N - 1) patterns to the classes w.r.t. the selected Lp
 # 5. Generate o Voronoi diagram for these N × N patterns (effectively, for the N × N Hanan grid)
 # 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 seems unpredictable enough)
@@ -57,7 +57,7 @@ def draw_sites(img, nxy, px, color):
 @ITT
 def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = True):
 	seed(sd) # Controlled randomness to get a better picture of the phenomenon
-	         # ♫♪♫ Choking on the bad, bad, bad, bad, bad, bad seed! ♪♫
+	         # ♫♪ Choking on the bad, bad, bad, bad, bad, bad seed! ♪♫
 	image = Image.new("RGB", (w, w))
 	pp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]
 	# ♫♪ We're gonna have to reap from some seed that's been sowed... ♪♫
@@ -112,7 +112,6 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
 		f = './images/Voronoi-sites-L{0}@{1}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	return zip(*nxy)
-
 @ITT
 def lp_agnostic_Voronoi_diagram(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303):
 	## Essentially, given N points, we 'yield' a Cartesian product of two vectors 
@@ -142,7 +141,6 @@ def lp_agnostic_Voronoi_diagram(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303)
 	draw_sites(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
 	f = './images/Lp-agnostic-Voronoi-sites-L{0}@{1}'.format(p, sd)
 	image.save(f + '.png', 'png'); image.save(f + '.pdf', 'pdf')
-
 @ITT
 def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False, lattice = False):
 	## Generate extra patterns for extra precision (in locations
@@ -154,8 +152,7 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q =
 	ax, ay = [], []
 	while(len(ax) < m * c):
 		x, y = RXY(w)
-		if(img[x, y] != (0x0, 0x0, 0x0)):
-			ax += [x]; ay += [y]
+		if(img[x, y] != (0x0, 0x0, 0x0)): ax += [x]; ay += [y]
 	image.close()
 	NX += tuple(ax); NY += tuple(ay)
 
@@ -182,10 +179,10 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q =
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... sites
 	if(sites):
-		if(lattice):
-			draw_sites(img, product(NX, NY), [-1, 0, 1], c_white)
+		if(lattice): draw_sites(img, product(NX, NY), [-1, 0, 1], c_white)
 		draw_sites(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
 		draw_sites(img, zip(ax, ay), [-3, -2, -1, 0, 1, 2, 3], c_red)
+		
 		f = './images/Lp-improved-agnostic-Voronoi-sites@{}'.format(sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 

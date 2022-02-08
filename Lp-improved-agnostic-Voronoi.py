@@ -1,11 +1,11 @@
 ﻿## The Lp agnostic 1-NN algorithm illustration [Project «⅄⅃LY»]
 # 1. Generate N random patterns inside a square
 # 2. Create the Voronoi's diagram for Lp, 0 < p ≤ 2 (p = 2.0 is somehow distingushed)
-# 3. Complement N patterns with a lattice of N × (N - 1) patterns to get a Hanan grid
+# 3. Compute an N × N Cartesian product of pattern's coordinates to get a Hanan grid
 # 4. Associate the new N × (N - 1) patterns to the classes w.r.t. the selected Lp
 # 5. Generate o Voronoi diagram for these N × N patterns (effectively, for the N × N Hanan grid)
 # 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 seems intriguing enough)
-# 7. In order to improve approximation quality one can add a new (set of) 
+# 7. In order to improve approximation quality one can add a new (set of L) 
 #    pattern(s) in the arbitrary position(s), together with the accompanying lattice points.
 
 ## &"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\python.exe" .\Lp-improved-agnostic-Voronoi.py

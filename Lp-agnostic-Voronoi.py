@@ -1,7 +1,7 @@
 ﻿## The Lp agnostic 1-NN algorithm illustration [Project «⅄⅃LY»]
 # 1. Generate N random patterns inside a square
 # 2. Create the Voronoi's diagram for Lp, 0 < p ≤ 2 (p = 2.0 is somehow distingushed)
-# 3. Complement N patterns with a lattice of N × (N - 1) patterns to get a Hanan grid
+# 3. Compute an N × N Cartesian product of pattern's coordinates to get a Hanan grid
 # 4. Associate the new N × (N - 1) patterns to the classes w.r.t. the selected Lp
 # 5. Generate o Voronoi diagram for these N × N patterns (effectively, for the N × N Hanan grid)
 # 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 seems arbitrary enough)
@@ -21,7 +21,7 @@ c, sd = (int(argv[1]), int(argv[2])) if len(argv) >= 3 else (int(argv[1]), rsd) 
 
 # Lp, for both p and q
 w, Hanan = 0x100, eval(argv[3]) if len(argv) == 4 else False
-qs, ps = [2.0], [.25, 0.5, 1.0, 2.0, 4.0]
+qs, ps = (2.0), (.25, 0.5, 1.0, 2.0, 4.0)
 for p in ps:
    for q in qs: 
         ## The diagrams for fixed (planted) patterns... 

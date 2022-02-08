@@ -9,6 +9,7 @@
 from time import time as TT
 from random import randrange as RA, seed
 from numpy import arange
+from itertools import product
 from math import sqrt, inf
 from PIL import Image, ImageMath
 from os.path import isfile
@@ -45,6 +46,10 @@ def ITT(f):
 		return r
 	return time_warper_wrapper
 
+def draw_sites(img, nx, ny, px, color):
+	for i, dx, dy in product(range(len(nx)), px, px):
+		img[nx[i] + dx, ny[i] + dy] = color
+
 ### 2D diagram generators (based on https://rosettacode.org/wiki/Voronoi_diagram#Python)
 ##  A diagram of seeds (patterns) planted on a Hanan grid
 @ITT
@@ -63,65 +68,56 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = Tr
 	img = image.load()
 	# ... cells
 	c = len(colors)
-	for y in range(w):
-		for x in range(w):
-			dmin, j = lp_length(w - 1, w - 1, p), -1
-			for i in range(c):
-				d = lp_length(nx[i] - x, ny[i] - y, p)
-				if d < dmin:
-					dmin, j = d, i 
-			img[x, y] = nr[j], ng[j], nb[j]
-	if(not sites):
-		f = './images/Voronoi-planted-L{0}@{1}'.format(p, sd)
-		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
-
+	for x, y in product(range(w), range(w)):
+		dmin, j = lp_length(w - 1, w - 1, p), -1
+		for i in range(c):
+			d = lp_length(nx[i] - x, ny[i] - y, p)
+			if d < dmin: dmin, j = d, i 
+		img[x, y] = nr[j], ng[j], nb[j]
 	## ... sites
 	if(sites):
-		px = [-2, -1, 0, 1, 2]
-		for dx in px:
-			for dy in px:
-				for i in range(len(nx)):
-					img[nx[i] + dx, ny[i] + dy] = c_yellow
+		draw_sites(img, nx, ny, [-2, -1, 0, 1, 2], c_yellow)
 		f = './images/Voronoi-planted-sites-L{0}@{1}'.format(p, sd)
+		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
+	# ... or no sites...
+	else:
+		f = './images/Voronoi-planted-L{0}@{1}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	return nx, ny
 
 ## Working stuff... 
 @ITT
 def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
-	seed(sd) # Controlled randomness to get the same points for various p
+	seed(sd) # Controlled randomness that yields the same psuedo-random patterns for various p
 	image = Image.new("RGB", (w, w))
 	
-	# Just a standard random case... # Black (, red) & white...
+	# Just a standard random case... # Black (, red) & white(-ish)...
 
 	nxy, nrgb = zip(*[(RXY(w), RRC(0x0, 0x100)) for _ in range(c)])
 	(nx, ny), (nr, ng, nb) = zip(*nxy), zip(*nrgb)
 	##Drawing...
 	img = image.load()
 	# ... cells
-	for y in range(w):
-		for x in range(w):
-			dmin, j = lp_length(w - 1, w - 1, p), -1
-			for i in range(c):
-				d = lp_length(nx[i] - x, ny[i] - y, p)
-				if d < dmin:
-					dmin, j = d, i 
-			img[x, y] = nr[j], ng[j], nb[j]
+	for x, y in product(range(w), range(w)):
+		dmin, j = lp_length(w - 1, w - 1, p), -1
+		for i in range(c):
+			d = lp_length(nx[i] - x, ny[i] - y, p)
+			if d < dmin:
+				dmin, j = d, i 
+		img[x, y] = nr[j], ng[j], nb[j]
 
 	f = './images/Voronoi-L{0}@{1}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 
 	## ... sites
 	if(sites):
-		px = [-2, -1, 0, 1, 2]
-		for dx in px:
-			for dy in px:
-				for i in range(len(nx)):
-					img[nx[i] + dx, ny[i] + dy] = c_yellow
+		draw_sites(img, nx, ny, [-2, -1, 0, 1, 2], c_yellow)
 		f = './images/Voronoi-sites-L{0}@{1}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	return nx, ny
 
+## Essentially, given N points, we compute a Cartesian product of two vectors 
+# of N elements being their first and second coordinates, respectively
 @ITT
 def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, sd = 0x303):
 	# Generate N × (N-1) additional patterns to form an N × N lattice (Hanan grid)
@@ -142,29 +138,19 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 	image = Image.new("RGB", (w, w))
 	img = image.load()
 	# ... cells
-	for y in range(w):
-		for x in range(w):
-			dmin, j = lp_length(w - 1, w - 1, q), -1
-			for i in range(c):
-				d = lp_length(nx[i] - x, ny[i] - y, q)
-				if d < dmin:
-					dmin, j = d, i
-			img[x, y] = nr[j], ng[j], nb[j]
+	for x, y in product(range(w), range(w)):
+		dmin, j = lp_length(w - 1, w - 1, q), -1
+		for i in range(c):
+			d = lp_length(nx[i] - x, ny[i] - y, q)
+			if d < dmin:
+				dmin, j = d, i
+		img[x, y] = nr[j], ng[j], nb[j]
 
 	f = './images/Lp-agnostic-Voronoi-L{0}@{1}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
-	if(1):
-		if(1):
-			px = [-1, 0, 1]
-			for dx in px:
-				for dy in px:
-					for i in range(c):
-						img[nx[i] + dx, ny[i] + dy] = c_white
-		px = [-2, -1, 0, 1, 2]
-		for dx in px:
-			for dy in px:
-				for i in range(len(NX)):
-					img[NX[i] + dx, NY[i] + dy] = c_yellow
+
+	draw_sites(img, nx, ny, [-1, 0, 1], c_white)
+	draw_sites(img, NX, NY, [-2, -1, 0, 1, 2], c_yellow)
 	f = './images/Lp-agnostic-Voronoi-sites-L{0}@{1}'.format(p, sd)
 	image.save(f + '.png', 'png'); image.save(f + '.pdf', 'pdf')
 
@@ -172,12 +158,11 @@ def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, 
 def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False, lattice = False):
 
 	## Generate extra patterns for extra precision (in locations
-	#   where the classifications differ for Lp and for agnostic-Lp).
-##ALLY
+	#   where the classifiers differ for Lp and for agnostic-Lp).
+## ⅄⅃LY 
 	f = './images/agnostic-Voronoi-math-L{}@{}'.format(p, sd)
 	image = Image.open(f + '.png'); img = image.load()
 	w = image.size[0]
-	#seed(TT())
 	ax, ay = [], []
 	while(len(ax) < m * c):
 		x, y = RXY(w)
@@ -185,7 +170,7 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 			ax += [x]; ay += [y]
 	image.close()
 	NX += tuple(ax); NY += tuple(ay)
-##ALLY
+## ⅄⅃LY (and the Cartiesian product again) 
 	# Generate N × (N-1) additional patterns to form an N × N lattice (Hanan grid)
 	# ... and some extra patterns as well
 	c = len(NX); nx, ny = [], c*NY
@@ -204,36 +189,21 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 	image = Image.new("RGB", (w, w))
 	img = image.load()
 	# ... cells
-	for y in range(w):
-		for x in range(w):
-			dmin, j = lp_length(w - 1, w - 1, q), -1
-			for i in range(c):
-				d = lp_length(nx[i] - x, ny[i] - y, q)
-				if d < dmin:
-					dmin, j = d, i
-			img[x, y] = nr[j], ng[j], nb[j]
+	for x, y in product(range(w), range(w)):
+		dmin, j = lp_length(w - 1, w - 1, q), -1
+		for i in range(c):
+			d = lp_length(nx[i] - x, ny[i] - y, q)
+			if d < dmin: dmin, j = d, i
+		img[x, y] = nr[j], ng[j], nb[j]
 
 	f = './images/Lp-improved-agnostic-Voronoi-L{0}@{1}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... sites
 	if(sites):
 		if(lattice):
-			px = [-1, 0, 1]
-			for dx in px:
-				for dy in px:
-					for i in range(c):
-						img[nx[i] + dx, ny[i] + dy] = c_white
-		px = [-2, -1, 0, 1, 2]
-		for dx in px:
-			for dy in px:
-				for i in range(len(NX)):
-					img[NX[i] + dx, NY[i] + dy] = c_yellow
-		px = [-3, -2, -1, 0, 1, 2, 3]
-		for dx in px:
-			for dy in px:
-				for i in range(len(ax)):
-					img[ax[i] + dx, ay[i] + dy] = c_red
-		## ... and the lattice
+			draw_sites(img, nx, ny, [-1, 0, 1], c_white)
+		draw_sites(img, NX, NY, [-2, -1, 0, 1, 2], c_yellow)
+		draw_sites(img, ax, ay, [-3, -2, -1, 0, 1, 2, 3], c_red)
 		f = './images/Lp-improved-agnostic-Voronoi-sites@{}'.format(sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 

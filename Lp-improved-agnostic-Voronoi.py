@@ -25,15 +25,16 @@ c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) 
 p, q, w = 2.0, 1.0, 0x100
 ## The reference diagrams for p and q...
 NXY, _ = lp_Voronoi_diagram(w, p, c, sd, sites = True), lp_Voronoi_diagram(w, q, c, sd, sites = False)
+NXY = list(NXY) # ♫♪ Ad futuram rei memoriam ♪♫
 # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
-for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi_diagram(*NXY, w, *pq, c, sd)
+for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi_diagram(*NXY, *pq, c, sd)
 
 ## ... and (supposedly) their more accurate versions
 # Make a difference
 lp_agnostic_Voronoi_ps(p, sd); lp_agnostic_Voronoi_ps(q, sd)
 # Compute the improved version for Lp
-lp_improved_agnostic_Voronoi_diagram(*NXY, w, 0x1, c, p, q, sd, sites = True, lattice = True)
+lp_improved_agnostic_Voronoi_diagram(*NXY, 0x1, c, p, q, sd, sites = True, lattice = True)
 
 # ... a (nutshell) summary and fanfares!
 print('seed =', sd)
-for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl)
+for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl) # ♫♪ ¡⅄⅃LY! ♪♫

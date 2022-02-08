@@ -14,12 +14,11 @@ from math import sqrt, inf
 from PIL import Image, ImageMath
 from os.path import isfile
 
-## Colors...
+## Colors united...
 c_red, c_green, c_blue, c_yellow, c_black, c_gray, c_whitish, c_white = ((0xff, 0, 0), (0, 0xff, 0), 
 																		 (0, 0, 0xff), (0xff, 0xff, 0),
 																		 (0, 0, 0), (0x80, 0x80, 0x80), 
 																		 (0xdd, 0xdd, 0xdd), (0xff, 0xff, 0xff))
-
 ## Random random utilities... (s = 0x96 for binary B&W diagrams and s = 0x20 for others)
 RRGB = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
 RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else c_red 
@@ -27,6 +26,7 @@ RRC = RBW if(0x1) else RRGB                                    # ^red patches^
 RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
 ## ... and an lp-distance function implementation... See: https://www.geeksforgeeks.org/python-infinity/
+#  (waiting for pattern matching in Python...)
 dictum_acerbum = {	0.0: lambda x, y: int(x != 0.0) + int(y != 0.0),		# p == 0.0, the Hamming distance
 					0.5: lambda x, y: (sqrt(abs(x)) + sqrt(abs(y)))**2.0,	# p == 0.5, hand-crafted optimization
 					1.0: lambda x, y: abs(x) + abs(y),						# p == 1.0, the taxi-cab metric (Manhattan distance) 
@@ -46,123 +46,111 @@ def ITT(f):
 		return r
 	return time_warper_wrapper
 
-def draw_sites(img, nx, ny, px, color):
-	for i, dx, dy in product(range(len(nx)), px, px):
-		img[nx[i] + dx, ny[i] + dy] = color
+## Let's Cartesian'em all!
+def draw_sites(img, nxy, px, color):
+	for nx, ny in nxy:
+		for dx, dy in product(px, px):
+			img[nx + dx, ny + dy] = color
 
-### 2D diagram generators (based on https://rosettacode.org/wiki/Voronoi_diagram#Python)
+### 2D Voronoi diagram generators (based on https://rosettacode.org/wiki/Voronoi_diagram#Python)
 ##  A diagram of seeds (patterns) planted on a Hanan grid
 @ITT
 def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = True):
 	seed(sd) # Controlled randomness to get a better picture of the phenomenon
-	         # ♫ Choking on the bad, bad, bad, bad, bad, bad seed! ♫
+	         # ♫♪♫ Choking on the bad, bad, bad, bad, bad, bad seed! ♪♫
 	image = Image.new("RGB", (w, w))
 	pp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]
-	# ♫ We're gonna have to reap from some seed that's been sowed... ♫
-	planted_pattern =  [[pp[0], pp[0]], [pp[0], pp[1]], [pp[1], pp[0]], [pp[1], pp[1]]] # on-grid patterns
-	planted_pattern += [[pp[1], pp[0] if Hanan else RA(w)]]								# a random pattern
+	# ♫♪ We're gonna have to reap from some seed that's been sowed... ♪♫
+	planted =  list(product(pp, pp))				# on-grid patterns
+	planted += [[pp[1], pp[0] if Hanan else RA(w)]]	# a random pattern
 	colors = [c_red, c_whitish, c_gray, c_black, c_black]
 
-	(nx, ny), (nr, ng, nb) = zip(*planted_pattern), zip(*colors)
-	##Drawing...
 	img = image.load()
-	# ... cells
-	c = len(colors)
+	## Filling cells (i.e. performing classification)
 	for x, y in product(range(w), range(w)):
 		dmin, j = lp_length(w - 1, w - 1, p), -1
-		for i in range(c):
-			d = lp_length(nx[i] - x, ny[i] - y, p)
-			if d < dmin: dmin, j = d, i 
-		img[x, y] = nr[j], ng[j], nb[j]
-	## ... sites
+		for i, (px, py) in enumerate(planted):
+			d = lp_length(px - x, py - y, p)
+			if d < dmin: 
+				dmin, j = d, i
+		img[x, y] = colors[j]
+	## ... and sites
 	if(sites):
-		draw_sites(img, nx, ny, [-2, -1, 0, 1, 2], c_yellow)
+		draw_sites(img, planted, [-2, -1, 0, 1, 2], c_yellow)
 		f = './images/Voronoi-planted-sites-L{0}@{1}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	# ... or no sites...
 	else:
 		f = './images/Voronoi-planted-L{0}@{1}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
-	return nx, ny
+	return planted
 
-## Working stuff... 
+## Actual working stuff... 
 @ITT
 def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
-	seed(sd) # Controlled randomness that yields the same psuedo-random patterns for various p
-	image = Image.new("RGB", (w, w))
+	seed(sd) # Controlled randomness that yields the same pseudo-random patterns for various p
+			 # Just a standard random case... # Black (, red) & white(-ish)...
+	nxy, nrgb = zip(*((RXY(w), RRC(0x0, 0x100)) for _ in range(c)))
 	
-	# Just a standard random case... # Black (, red) & white(-ish)...
-
-	nxy, nrgb = zip(*[(RXY(w), RRC(0x0, 0x100)) for _ in range(c)])
-	(nx, ny), (nr, ng, nb) = zip(*nxy), zip(*nrgb)
-	##Drawing...
-	img = image.load()
+	## Drawing... (i.e. classifying w.r.t. the set Sn)
+	image = Image.new("RGB", (w, w)); img = image.load()
 	# ... cells
 	for x, y in product(range(w), range(w)):
 		dmin, j = lp_length(w - 1, w - 1, p), -1
-		for i in range(c):
-			d = lp_length(nx[i] - x, ny[i] - y, p)
-			if d < dmin:
+		for i, (px, py) in enumerate(nxy):
+			d = lp_length(px - x, py - y, p)
+			if d < dmin: 
 				dmin, j = d, i 
-		img[x, y] = nr[j], ng[j], nb[j]
+		img[x, y] = tuple(nrgb[j])
 
 	f = './images/Voronoi-L{0}@{1}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 
 	## ... sites
 	if(sites):
-		draw_sites(img, nx, ny, [-2, -1, 0, 1, 2], c_yellow)
+		draw_sites(img, nxy, [-2, -1, 0, 1, 2], c_yellow)
 		f = './images/Voronoi-sites-L{0}@{1}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
-	return nx, ny
+	return zip(*nxy)
 
-## Essentially, given N points, we compute a Cartesian product of two vectors 
-# of N elements being their first and second coordinates, respectively
 @ITT
-def lp_agnostic_Voronoi_diagram(NX, NY, w = 0x100, p = 2.0, q = 0.25, c = 0x10, sd = 0x303):
-	# Generate N × (N-1) additional patterns to form an N × N lattice (Hanan grid)
-	# ... and extra patterns as well
-	c = len(NX); nx, ny = [], c*NY
-	for n in range(c):
-		nx += c*[NX[n]]		
-	c *= len(NY);
-
-	# Set pattern's classes from the image
+def lp_agnostic_Voronoi_diagram(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303):
+	## Essentially, given N points, we 'yield' a Cartesian product of two vectors 
+	# of N elements being their first and second coordinates, respectively
 	f = './images/Voronoi-L{0}@{1}'.format(p, sd)
-	image = Image.open(f + '.png'); img = image.load()
-	w = image.size[0]
-	nr, ng, nb = zip(*[img[nx[j], ny[j]] for j in range(c)])
+	image = Image.open(f + '.png')
+	img, (w, _) = image.load(), image.size
+	nrgb = [img[nx, ny] for nx, ny in product(NX, NY)]
 	image.close()
-	
-	## Drawing...
+
+	## Drawing... (i.e. classifying w.r.t. the set An)
 	image = Image.new("RGB", (w, w))
 	img = image.load()
 	# ... cells
 	for x, y in product(range(w), range(w)):
 		dmin, j = lp_length(w - 1, w - 1, q), -1
-		for i in range(c):
-			d = lp_length(nx[i] - x, ny[i] - y, q)
-			if d < dmin:
+		for i, (nx, ny) in enumerate(product(NX, NY)):
+			d = lp_length(nx - x, ny - y, q)
+			if d < dmin: 
 				dmin, j = d, i
-		img[x, y] = nr[j], ng[j], nb[j]
+		img[x, y] = nrgb[j]
 
 	f = './images/Lp-agnostic-Voronoi-L{0}@{1}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 
-	draw_sites(img, nx, ny, [-1, 0, 1], c_white)
-	draw_sites(img, NX, NY, [-2, -1, 0, 1, 2], c_yellow)
+	draw_sites(img, product(NX, NY), [-1, 0, 1], c_white)
+	draw_sites(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
 	f = './images/Lp-agnostic-Voronoi-sites-L{0}@{1}'.format(p, sd)
 	image.save(f + '.png', 'png'); image.save(f + '.pdf', 'pdf')
 
 @ITT
-def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False, lattice = False):
-
+def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False, lattice = False):
 	## Generate extra patterns for extra precision (in locations
 	#   where the classifiers differ for Lp and for agnostic-Lp).
-## ⅄⅃LY 
+	## ⅄⅃LY 
 	f = './images/agnostic-Voronoi-math-L{}@{}'.format(p, sd)
 	image = Image.open(f + '.png'); img = image.load()
-	w = image.size[0]
+	(w, _) = image.size
 	ax, ay = [], []
 	while(len(ax) < m * c):
 		x, y = RXY(w)
@@ -170,40 +158,34 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, w = 0x100, m = 0x1, c = 0x10, p
 			ax += [x]; ay += [y]
 	image.close()
 	NX += tuple(ax); NY += tuple(ay)
-## ⅄⅃LY (and the Cartiesian product again) 
-	# Generate N × (N-1) additional patterns to form an N × N lattice (Hanan grid)
-	# ... and some extra patterns as well
-	c = len(NX); nx, ny = [], c*NY
-	for n in range(c):
-		nx += c*[NX[n]]		
-	c *= len(NY);
 
 	# Set pattern's classes from the image
 	f = './images/Voronoi-L{0}@{1}'.format(p, sd)
 	image = Image.open(f + '.png'); img = image.load()
-	w = image.size[0]
-	nr, ng, nb = zip(*[img[nx[j], ny[j]] for j in range(c)])
+	(w, _) = image.size
+	nrgb = [img[nx, ny] for nx, ny in product(NX, NY)]
 	image.close()
 	
-	## Drawing...
+	## Filling... (i.e. classifying w.r.t. the set An+l)
 	image = Image.new("RGB", (w, w))
 	img = image.load()
 	# ... cells
 	for x, y in product(range(w), range(w)):
 		dmin, j = lp_length(w - 1, w - 1, q), -1
-		for i in range(c):
-			d = lp_length(nx[i] - x, ny[i] - y, q)
-			if d < dmin: dmin, j = d, i
-		img[x, y] = nr[j], ng[j], nb[j]
+		for i, (nx, ny) in enumerate(product(NX, NY)):
+			d = lp_length(nx - x, ny - y, q)
+			if d < dmin: 
+				dmin, j = d, i
+		img[x, y] = nrgb[j]
 
 	f = './images/Lp-improved-agnostic-Voronoi-L{0}@{1}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... sites
 	if(sites):
 		if(lattice):
-			draw_sites(img, nx, ny, [-1, 0, 1], c_white)
-		draw_sites(img, NX, NY, [-2, -1, 0, 1, 2], c_yellow)
-		draw_sites(img, ax, ay, [-3, -2, -1, 0, 1, 2, 3], c_red)
+			draw_sites(img, product(NX, NY), [-1, 0, 1], c_white)
+		draw_sites(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
+		draw_sites(img, zip(ax, ay), [-3, -2, -1, 0, 1, 2, 3], c_red)
 		f = './images/Lp-improved-agnostic-Voronoi-sites@{}'.format(sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 

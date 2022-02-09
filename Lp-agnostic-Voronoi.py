@@ -12,6 +12,7 @@
 from winsound import Beep as beep
 from random import randrange as RA, seed
 from sys import argv
+from glob import glob; from os import remove
 ## Local stuff...
 from VoronoiUtilities import *
 
@@ -27,15 +28,17 @@ for p in ps:
         ## The diagrams for fixed (planted) patterns... 
         #  ♫♪ This thorn in my side is from the tree I've planted ♪♫ [so]
         #  ♫♪ I'm diggin' my way to somethin' better ♪♫ 
-        _ = lp_planted_Voronoi_diagram(sd, w, p, Hanan = Hanan, sites = True)
+        _ = lp_planted_Voronoi_diagram(sd, w, p, Hanan = Hanan)
 
         # The reference diagrams for p and q...
-        NXY, _ = lp_Voronoi_diagram(w, p, c, sd, sites = False), lp_Voronoi_diagram(w, q, c, sd, sites = False)
+        NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
         # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
         _ = lp_agnostic_Voronoi_diagram(*NXY, p, q, c, sd)
         # ... and the sets of patterns with different decisions
         _ = lp_agnostic_Voronoi_ps(p, sd)
 
-# ... a summary (in a nutshell) and fanfares! 
+## A bit of clean up...
+for file in glob('.\images\*.png'): remove(file)
+# ... and a (nutshell) summary and fanfares!
 print('seed =', sd)
-for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl) #♫♪ ¡⅄⅃LY! ♪♫
+for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl) # ♫♪ ¡⅄⅃LY! ♪♫

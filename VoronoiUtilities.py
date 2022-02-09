@@ -26,7 +26,7 @@ RRC = RBW if(0x1) else RRGB                                    # ^red patches^
 RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
 ## ... and an lp-distance function implementation... See: https://www.geeksforgeeks.org/python-infinity/
-#  (waiting for pattern matching in Python...)
+#  (waiting for pattern matching in Python 3.10+...)
 dictum_acerbum = {	0.0: lambda x, y: int(x != 0.0) + int(y != 0.0),		# p == 0.0, the Hamming distance
 					0.5: lambda x, y: (sqrt(abs(x)) + sqrt(abs(y)))**2.0,	# p == 0.5, hand-crafted optimization
 					1.0: lambda x, y: abs(x) + abs(y),						# p == 1.0, the taxi-cab metric (Manhattan distance) 
@@ -53,6 +53,7 @@ def paint_patterns(img, nxy, px, color):
 			img[nx + dx, ny + dy] = color
 
 def classify_NN(w, p, img, nxy, colors):
+	if type(nxy) == product: nxy = list(nxy) # ♫♪ Ad perpetuam rei memoriam ♪♫
 	for x, y in product(range(w), range(w)):
 		dmin, j = lp_length(w - 1, w - 1, p), -1
 		for i, (nx, ny) in enumerate(nxy):
@@ -123,7 +124,7 @@ def lp_agnostic_Voronoi_diagram(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303)
 	image = Image.new("RGB", (w, w))
 	img = image.load()
 	# ... cells
-	classify_NN(w, p, img, list(product(NX, NY)), nrgb)
+	classify_NN(w, p, img, product(NX, NY), nrgb)
 
 	f = './images/Lp-agnostic-Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
@@ -157,7 +158,7 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q =
 	image = Image.new("RGB", (w, w))
 	img = image.load()
 	# ... cells
-	classify_NN(w, p, img, list(product(NX, NY)), nrgb)
+	classify_NN(w, p, img, product(NX, NY), nrgb)
 
 	f = './images/Lp-improved-agnostic-Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')

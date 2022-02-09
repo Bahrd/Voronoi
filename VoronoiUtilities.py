@@ -47,7 +47,7 @@ def ITT(f):
 	return time_warper_wrapper
 
 ## Let's Cartesian'em all!
-def draw_sites(img, nxy, px, color):
+def paint_patterns(img, nxy, px, color):
 	for nx, ny in nxy:
 		for dx, dy in product(px, px):
 			img[nx + dx, ny + dy] = color
@@ -79,7 +79,7 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = Tr
 	classify_NN(w, p, img, planted, colors)
 	## ... and sites
 	if(sites):
-		draw_sites(img, planted, [-2, -1, 0, 1, 2], c_yellow)
+		paint_patterns(img, planted, [-2, -1, 0, 1, 2], c_yellow)
 		f = './images/Voronoi-planted-sites-L{}@{}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	# ... or no sites...
@@ -105,7 +105,7 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
 
 	## ... sites
 	if(sites):
-		draw_sites(img, nxy, [-2, -1, 0, 1, 2], c_yellow)
+		paint_patterns(img, nxy, [-2, -1, 0, 1, 2], c_yellow)
 		f = './images/Voronoi-sites-L{}@{}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	return zip(*nxy)
@@ -128,8 +128,8 @@ def lp_agnostic_Voronoi_diagram(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303)
 	f = './images/Lp-agnostic-Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 
-	draw_sites(img, product(NX, NY), [-1, 0, 1], c_white)
-	draw_sites(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
+	paint_patterns(img, product(NX, NY), [-1, 0, 1], c_white)
+	paint_patterns(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
 	f = './images/Lp-agnostic-Voronoi-sites-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'png'); image.save(f + '.pdf', 'pdf')
 @ITT
@@ -163,9 +163,9 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q =
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... sites
 	if(sites):
-		if(lattice): draw_sites(img, product(NX, NY), [-1, 0, 1], c_white)
-		draw_sites(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
-		draw_sites(img, zip(ax, ay), [-3, -2, -1, 0, 1, 2, 3], c_red)
+		if(lattice): paint_patterns(img, product(NX, NY), [-1, 0, 1], c_white)
+		paint_patterns(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
+		paint_patterns(img, zip(ax, ay), [-3, -2, -1, 0, 1, 2, 3], c_red)
 		
 		f = './images/Lp-improved-agnostic-Voronoi-sites@{}'.format(sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')

@@ -42,7 +42,7 @@ def ITT(f):
 		begin = TT() # from time import time as TT
 		r = f(*args, **kwargs) 
 		end = TT()
-		print('{0} evaluated in {1}s'.format(f.__name__, round(end - begin)))
+		print('{} created [in {}s]'.format(f.__name__, round(end - begin)))
 		return r
 	return time_warper_wrapper
 
@@ -51,6 +51,15 @@ def draw_sites(img, nxy, px, color):
 	for nx, ny in nxy:
 		for dx, dy in product(px, px):
 			img[nx + dx, ny + dy] = color
+
+def classify_NN(w, p, img, nxy, colors):
+	for x, y in product(range(w), range(w)):
+		dmin, j = lp_length(w - 1, w - 1, p), -1
+		for i, (nx, ny) in enumerate(nxy):
+			d = lp_length(nx - x, ny - y, p)
+			if d < dmin: 
+				dmin, j = d, i
+		img[x, y] = tuple(colors[j])
 
 ### 2D Voronoi diagram generators (based on https://rosettacode.org/wiki/Voronoi_diagram#Python)
 ##  A diagram of seeds (patterns) planted on a Hanan grid
@@ -67,21 +76,15 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, sites = Tr
 
 	img = image.load()
 	## Filling cells (i.e. performing classification)
-	for x, y in product(range(w), range(w)):
-		dmin, j = lp_length(w - 1, w - 1, p), -1
-		for i, (px, py) in enumerate(planted):
-			d = lp_length(px - x, py - y, p)
-			if d < dmin: 
-				dmin, j = d, i
-		img[x, y] = colors[j]
+	classify_NN(w, p, img, planted, colors)
 	## ... and sites
 	if(sites):
 		draw_sites(img, planted, [-2, -1, 0, 1, 2], c_yellow)
-		f = './images/Voronoi-planted-sites-L{0}@{1}'.format(p, sd)
+		f = './images/Voronoi-planted-sites-L{}@{}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	# ... or no sites...
 	else:
-		f = './images/Voronoi-planted-L{0}@{1}'.format(p, sd)
+		f = './images/Voronoi-planted-L{}@{}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	return planted
 
@@ -95,28 +98,22 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303, sites = False):
 	## Drawing... (i.e. classifying w.r.t. the set Sn)
 	image = Image.new("RGB", (w, w)); img = image.load()
 	# ... cells
-	for x, y in product(range(w), range(w)):
-		dmin, j = lp_length(w - 1, w - 1, p), -1
-		for i, (px, py) in enumerate(nxy):
-			d = lp_length(px - x, py - y, p)
-			if d < dmin: 
-				dmin, j = d, i 
-		img[x, y] = tuple(nrgb[j])
+	classify_NN(w, p, img, nxy, nrgb)
 
-	f = './images/Voronoi-L{0}@{1}'.format(p, sd)
+	f = './images/Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 
 	## ... sites
 	if(sites):
 		draw_sites(img, nxy, [-2, -1, 0, 1, 2], c_yellow)
-		f = './images/Voronoi-sites-L{0}@{1}'.format(p, sd)
+		f = './images/Voronoi-sites-L{}@{}'.format(p, sd)
 		image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	return zip(*nxy)
 @ITT
 def lp_agnostic_Voronoi_diagram(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303):
 	## Essentially, given N points, we 'yield' a Cartesian product of two vectors 
 	# of N elements being their first and second coordinates, respectively
-	f = './images/Voronoi-L{0}@{1}'.format(p, sd)
+	f = './images/Voronoi-L{}@{}'.format(p, sd)
 	image = Image.open(f + '.png')
 	img, (w, _) = image.load(), image.size
 	nrgb = [img[nx, ny] for nx, ny in product(NX, NY)]
@@ -126,20 +123,14 @@ def lp_agnostic_Voronoi_diagram(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303)
 	image = Image.new("RGB", (w, w))
 	img = image.load()
 	# ... cells
-	for x, y in product(range(w), range(w)):
-		dmin, j = lp_length(w - 1, w - 1, q), -1
-		for i, (nx, ny) in enumerate(product(NX, NY)):
-			d = lp_length(nx - x, ny - y, q)
-			if d < dmin: 
-				dmin, j = d, i
-		img[x, y] = nrgb[j]
+	classify_NN(w, p, img, list(product(NX, NY)), nrgb)
 
-	f = './images/Lp-agnostic-Voronoi-L{0}@{1}'.format(p, sd)
+	f = './images/Lp-agnostic-Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 
 	draw_sites(img, product(NX, NY), [-1, 0, 1], c_white)
 	draw_sites(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
-	f = './images/Lp-agnostic-Voronoi-sites-L{0}@{1}'.format(p, sd)
+	f = './images/Lp-agnostic-Voronoi-sites-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'png'); image.save(f + '.pdf', 'pdf')
 @ITT
 def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303, sites = False, lattice = False):
@@ -148,7 +139,7 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q =
 	## ⅄⅃LY 
 	f = './images/agnostic-Voronoi-math-L{}@{}'.format(p, sd)
 	image = Image.open(f + '.png'); img = image.load()
-	(w, _) = image.size
+	w, _  = image.size
 	ax, ay = [], []
 	while(len(ax) < m * c):
 		x, y = RXY(w)
@@ -157,9 +148,8 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q =
 	NX += tuple(ax); NY += tuple(ay)
 
 	# Set pattern's classes from the image
-	f = './images/Voronoi-L{0}@{1}'.format(p, sd)
+	f = './images/Voronoi-L{}@{}'.format(p, sd)
 	image = Image.open(f + '.png'); img = image.load()
-	(w, _) = image.size
 	nrgb = [img[nx, ny] for nx, ny in product(NX, NY)]
 	image.close()
 	
@@ -167,15 +157,9 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q =
 	image = Image.new("RGB", (w, w))
 	img = image.load()
 	# ... cells
-	for x, y in product(range(w), range(w)):
-		dmin, j = lp_length(w - 1, w - 1, q), -1
-		for i, (nx, ny) in enumerate(product(NX, NY)):
-			d = lp_length(nx - x, ny - y, q)
-			if d < dmin: 
-				dmin, j = d, i
-		img[x, y] = nrgb[j]
+	classify_NN(w, p, img, list(product(NX, NY)), nrgb)
 
-	f = './images/Lp-improved-agnostic-Voronoi-L{0}@{1}'.format(p, sd)
+	f = './images/Lp-improved-agnostic-Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... sites
 	if(sites):
@@ -193,7 +177,7 @@ def lp_agnostic_Voronoi_ps(p = 2, sd = 0x303, improved = False, sites = False, o
 		fp = './images/Voronoi-L{}@{}.png'.format(p, sd)
 		fav, fpv = Image.open(fa), Image.open(fp); fdv = Image.new('RGB', fpv.size)
 		#ImageMath doesn't process RGB images (at the time of writing this code)...
-		fdv = Image.merge('RGB', [ImageMath.eval('convert({0}, "L")'.format(opr), a = ipb, b = iqb) \
+		fdv = Image.merge('RGB', [ImageMath.eval('convert({}, "L")'.format(opr), a = ipb, b = iqb) \
 								  for (ipb, iqb) in zip(fpv.split(), fav.split())])
 		f = './images/agnostic-{}Voronoi-math-L{}@{}'.format('improved-' if improved else '', p, sd)
 		fdv.save(f + '.png', 'PNG'); fdv.save(f + '.pdf', 'PDF')

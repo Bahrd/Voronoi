@@ -21,7 +21,7 @@ c, sd = (int(argv[1]), int(argv[2])) if len(argv) >= 3 else (int(argv[1]), rsd) 
 
 # Lp, for both p and q
 w, Hanan = 0x100, eval(argv[3]) if len(argv) == 4 else False
-qs, ps = (2.0), (.25, 0.5, 1.0, 2.0, 4.0)
+qs, ps = [2.0], [.25, 0.5, 1.0, 2.0, 4.0]
 for p in ps:
    for q in qs: 
         ## The diagrams for fixed (planted) patterns... 

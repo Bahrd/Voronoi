@@ -21,14 +21,14 @@ rsd = int(RA(0x12345678))
 c, sd = (int(argv[1]), int(argv[2])) if len(argv) >= 3 else (int(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
 
 # Lp, for both p and q
-w, Hanan = 0x100, eval(argv[3]) if len(argv) == 4 else False
-qs, ps = [2.0], [.25, 0.5, 1.0, 2.0, 4.0]
+Hanan, context = (eval(argv[3]), eval(argv[4])) if len(argv) == 5 else (False, True)
+w, qs, ps = 0x100, [2.0], [.25, 0.5, 1.0, 2.0, 4.0]
 for p in ps:
    for q in qs: 
         ## The diagrams for fixed (planted) patterns... 
         #  ♫♪ This thorn in my side is from the tree I've planted ♪♫ [so]
         #  ♫♪ I'm diggin' my way to somethin' better ♪♫ 
-        _ = lp_planted_Voronoi_diagram(sd, w, p, Hanan = Hanan)
+        _ = lp_planted_Voronoi_diagram(sd, w, p, Hanan = Hanan, context = context)
 
         # The reference diagrams for p and q...
         NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)

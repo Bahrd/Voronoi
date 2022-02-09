@@ -64,9 +64,9 @@ def classify_NN(w, p, img, nxy, colors):
 		img[x, y] = tuple(colors[j])
 
 ### 2D Voronoi diagram generators (based on https://rosettacode.org/wiki/Voronoi_diagram#Python)
-##  A diagram of seeds (patterns) planted on a Hanan grid
+##  A diagram of seeds (patterns) planted on a Hanan grid '.\Lp-agnostic-Voronoi.py 4 78386413 False True'
 @ITT
-def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False):
+def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, context = True):
 	seed(sd) # Controlled randomness to get a better picture of the phenomenon
 	         # ♫♪ Choking on the bad, bad, bad, bad, bad, bad seed! ♪♫
 	
@@ -74,8 +74,11 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False):
 	pp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]
 	# ♫♪ We're gonna have to reap from some seed that's been sowed... ♪♫
 	planted =  list(product(pp, pp))				# on-grid patterns
-	planted += [[pp[1], pp[0] if Hanan else RA(w)]]	# a random pattern
-	colors = [c_red, c_whitish, c_gray, c_black, c_black]
+	if Hanan == False:
+		outgrid = RA(w)
+		planted += [[pp[1], pp[0] if Hanan else outgrid]]	# a random pattern
+		if context == True: planted += [[pp[0], outgrid]]
+	colors = [c_red, c_whitish, c_gray, c_black, c_black, c_red]
 
 	## Filling cells (i.e. performing classification)
 	image = Image.new("RGB", (w, w)); img = image.load()

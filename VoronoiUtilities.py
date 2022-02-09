@@ -52,8 +52,8 @@ def paint_patterns(img, nxy, px, color):
 		for dx, dy in product(px, px):
 			img[nx + dx, ny + dy] = color
 
-def classify_NN(w, p, img, nxy, colors):
-	if type(nxy) != (list or tuple): nxy = list(nxy) #♫♪ Disposable Heroes/collections ♪♫
+def classify_NN(w, p, img, nxy, colors):				
+	if type(nxy) != (list or tuple): nxy = list(nxy) # Duct taped duck types: ♫♪ Disposable Heroes ♪♫ 
 	for x, y in product(range(w), range(w)):
 		dmin, j = lp_length(w, w, p), 0
 		for i, (nx, ny) in enumerate(nxy):
@@ -128,8 +128,8 @@ def lp_agnostic_Voronoi_diagram(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303)
 	f = './images/Lp-agnostic-Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... and patterns
-	paint_patterns(img, product(NX, NY), [-1, 0, 1],		c_white)
-	paint_patterns(img, zip(NX, NY),	 [-2, -1, 0, 1, 2], c_yellow)
+	paint_patterns(img, product(NX, NY),    [-1, 0, 1],	c_white)
+	paint_patterns(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
 	f = './images/Lp-agnostic-Voronoi-sites-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'png'); image.save(f + '.pdf', 'pdf')
 
@@ -160,9 +160,9 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q =
 	f = './images/Lp-improved-agnostic-Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... and painting patterns	
-	paint_patterns(img, product(NX, NY), [-1, 0, 1],			   c_white)
-	paint_patterns(img, zip(NX, NY),	 [-2, -1, 0, 1, 2],		   c_yellow)
-	paint_patterns(img, zip(ax, ay),	 [-3, -2, -1, 0, 1, 2, 3], c_red)
+	paint_patterns(img, product(NX, NY),           [-1, 0, 1], c_white)
+	paint_patterns(img, zip(NX, NY),    	[-2, -1, 0, 1, 2], c_yellow)
+	paint_patterns(img, zip(ax, ay), [-3, -2, -1, 0, 1, 2, 3], c_red)
 	f = './images/Lp-improved-agnostic-Voronoi-sites-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 

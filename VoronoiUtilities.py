@@ -53,7 +53,8 @@ def paint_patterns(img, nxy, px, color):
 			img[nx + dx, ny + dy] = color
 
 def classify_NN(w, p, img, nxy, colors):
-	if type(nxy) == product: nxy = list(nxy) # ♫♪ Ad perpetuam rei memoriam ♪♫
+	if type(nxy) != list or type(nxy) != tuple:	
+		nxy = list(nxy)	# "Ad perpetuam rei memoriam" for all ♫♪ Disposable Hero ♪♫ collections	
 	for x, y in product(range(w), range(w)):
 		dmin, j = lp_length(w - 1, w - 1, p), -1
 		for i, (nx, ny) in enumerate(nxy):

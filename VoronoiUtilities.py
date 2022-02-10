@@ -9,7 +9,7 @@
 from time import time as TT
 from random import randrange as RA, seed
 from numpy import arange
-from itertools import product
+from itertools import product, permutations
 from math import sqrt, inf
 from PIL import Image, ImageMath
 from os.path import isfile
@@ -22,7 +22,7 @@ c_red, c_green, c_blue, c_yellow, c_black, c_gray, c_whitish, c_white = ((0xff, 
 ## Random random utilities... (s = 0x96 for binary B&W diagrams and s = 0x20 for others)
 RRGB = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
 RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else c_red 
-RRC = RBW if(0x1) else RRGB                                    # ^red patches^
+RRC = RBW if(True) else RRGB  # Insert False to get colors
 RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
 ## ... and an lp-distance function implementation... See: https://www.geeksforgeeks.org/python-infinity/
@@ -49,7 +49,7 @@ def ITT(f):
 ## A naïve implementation of the 1-NN algorithm
 #  (based on https://rosettacode.org/wiki/Voronoi#Python)
 def classify_nn(w, p, img, nxy, colors):				
-	if type(nxy) != (list or tuple): nxy = list(nxy) # Duct taped duck types: ♫♪ Disposable Heroes ♪♫ 
+	if type(nxy) != (list or tuple): nxy = list(nxy) # Duct taped duck types (a.k.a. ♫♪ Disposable Heroes ♪♫)
 	for x, y in product(range(w), range(w)):
 		dmin, j = lp_length(w, w, p), 0
 		for i, (nx, ny) in enumerate(nxy):
@@ -72,27 +72,29 @@ def save_image(path, im_file, p, sd):
 	im_file.save(f + '.png', 'PNG'); im_file.save(f + '.pdf', 'PDF')
 
 ### Selection of 2D Voronoi diagrams generators
-##  A diagram of seeds (patterns) planted on a Hanan grid ['.\Lp-agnostic-Voronoi.py 4 78386413 False True']
-@ITT
+##  A diagram of seeds (patterns) planted on a Hanan grid
 def lp_planted_Voronoi(sd, w = 0x100, p = 2.0, Hanan = False, context = True):
 	seed(sd) # Controlled randomness to get a better picture of the phenomenon
 	         # ♫♪ Choking on the bad, bad, bad, bad, bad, bad seed! ♪♫
 	
 	## Creating patterns
-	colors = [c_red, c_whitish, c_gray, c_black, c_black, c_red]
-	pp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]
-	# ♫♪ We're gonna have to reap from some seed that's been sowed... ♪♫
-	planted =  list(product(pp, pp))				# on-grid patterns
-	if Hanan == False:
-		outgrid = RA(w)
-		planted += [[pp[1], pp[0] if Hanan else outgrid]]	# a random pattern
-		if context == True: planted += [[pp[0], outgrid]]
+	colors = [c_red, c_whitish, c_gray, c_black, c_black, c_whitish]
 
+	# ♫♪ We're gonna have to reap from some seed that's been sowed... ♪♫
+	pp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]   # Our 'pater noster' mother-pattern
+	planted = list(permutations(pp))				# Original kid-like patterns
+	implanted = list(product(pp, pp))				# Neigborhood patterns
+	if Hanan == False:
+		outgrid = [pp[1], RA(w)]					# A stray pattern
+		planted += [outgrid]; implanted += [outgrid]
+		if context == True:	implanted += [[pp[0], outgrid[1]]] # An on-grid companion of the stray one 
+															   # (♫♪ 'cause misery loves company! ♪♫)
 	## Filling cells (i.e. performing classification)
 	image = Image.new("RGB", (w, w)); img = image.load()
-	classify_nn(w, p, img, planted, colors)
+	classify_nn(w, p, img, implanted, colors)
 	save_image('./images/Voronoi-planted-L{}@{}', image, p, sd)
 	## ... and painting patterns
+	pin_patterns(img, implanted,      [-1, 0, 1], c_white)
 	pin_patterns(img, planted, [-2, -1, 0, 1, 2], c_yellow)
 	save_image('./images/Voronoi-planted-sites-L{}@{}', image, p, sd)
 

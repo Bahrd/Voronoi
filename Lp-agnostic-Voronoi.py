@@ -7,7 +7,8 @@
 # 6. Repeat the steps #2-#5 for other Lq, 0 < q ≤ 2 (q = 0.25 seems extraordinary enough)
 
 ## &"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\python.exe" - YPMV (Your Python May Vary)
-## .\Lp-agnostic-Voronoi.py 8 98828880 - used in the IEEE article
+#  .\Lp-agnostic-Voronoi.py '2**3' '2**4 * 3 * 5 * 19 * 21673' - as used in the IEEE article 
+#  Note 2**3 = 8 and 2**4 * 3 * 5 * 19 * 21673 = 98828880 - so ♫♪ please don't take [it serious] even though you can! ♪♫
 
 from winsound import Beep as beep
 from random import randrange as RA, seed
@@ -18,7 +19,7 @@ from VoronoiUtilities import *
 
 ## Show time off!
 rsd = int(RA(0x12345678))
-c, sd = (int(argv[1]), int(argv[2])) if len(argv) >= 3 else (int(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
+c, sd = (eval(argv[1]), eval(argv[2])) if len(argv) >= 3 else (eval(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
 
 # Lp, for both p and q
 Hanan, context = (eval(argv[3]), eval(argv[4])) if len(argv) == 5 else (False, True)

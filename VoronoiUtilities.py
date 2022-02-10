@@ -83,7 +83,7 @@ def lp_planted_Voronoi(sd, w = 0x100, p = 2.0, Hanan = False, context = True):
 	# ♫♪ We're gonna have to reap from some seed that's been sowed... ♪♫
 	pp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]   # Our 'pater noster' mother-pattern
 	planted = list(permutations(pp))				# Original kid-like patterns
-	implanted = list(product(pp, pp))				# Neigborhood patterns
+	implanted = list(product(pp, pp))				# Neighborhood patterns
 	if Hanan == False:
 		outgrid = [pp[1], RA(w)]					# A stray pattern
 		planted += [outgrid]; implanted += [outgrid]

@@ -22,7 +22,7 @@ c_red, c_green, c_blue, c_yellow, c_black, c_gray, c_whitish, c_white = ((0xff, 
 ## Random random utilities... (s = 0x96 for binary B&W diagrams and s = 0x20 for others)
 RRGB = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
 RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else c_red 
-RRC = RBW if(True) else RRGB  # Insert False to get colors
+RRC = RBW if(True) else RRGB  # Insert False to get true colors...
 RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
 
 ## ... and an lp-distance function implementation... See: https://www.geeksforgeeks.org/python-infinity/

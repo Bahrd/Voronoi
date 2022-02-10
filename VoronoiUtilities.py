@@ -20,10 +20,10 @@ c_red, c_green, c_blue, c_yellow, c_black, c_gray, c_whitish, c_white = ((0xff, 
 																		 (0, 0, 0), (0x80, 0x80, 0x80), 
 																		 (0xdd, 0xdd, 0xdd), (0xff, 0xff, 0xff))
 ## Random random utilities... (s = 0x96 for binary B&W diagrams and s = 0x20 for others)
-RRGB = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
-RBW = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else c_red 
-RRC = RBW if(True) else RRGB  # Insert False to get true colors...
-RR, RXY = lambda l:  RA(int(l/0x20), int(0x1f * l/0x20)), lambda l: [RR(l) for _ in range(2)]
+random_rgb = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
+random_rbw = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else c_red 
+random_color = random_rbw if(True) else random_rgb  # Insert 'False' to get ♫♪ true colors ♪♫...
+random_xy = lambda l: [RA(int(l/0x20), int(0x1f * l/0x20)) for _ in range(2)]
 
 ## ... and an lp-distance function implementation... See: https://www.geeksforgeeks.org/python-infinity/
 #  (waiting for pattern matching in Python 3.10+...)
@@ -85,7 +85,8 @@ def lp_planted_Voronoi(sd, w = 0x100, p = 2.0, Hanan = False, context = True):
 	planted = list(permutations(pp))				# Original kid-like patterns
 	implanted = list(product(pp, pp))				# Neighborhood patterns
 	if Hanan == False:
-		outgrid = [pp[1], RA(w)]					# A stray pattern
+		outgrid = [pp[1], RA(w)]					# A stray pattern ♫♪ Just like the curse, 
+													# just like the stray, you feed it once and now it stays! ♪♫ 
 		planted += [outgrid]; implanted += [outgrid]
 		if context == True:	implanted += [[pp[0], outgrid[1]]] # An on-grid companion of the stray one 
 															   # (♫♪ 'cause misery loves company! ♪♫)
@@ -110,7 +111,7 @@ def lp_Voronoi(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 			 # Just a standard random case... # Black (, red) & white(-ish)...
 	
 	## Creating patterns
-	nxy, nrgb = zip(*((RXY(w), RRC(0x0, 0x100)) for _ in range(c)))	
+	nxy, nrgb = zip(*((random_xy(w), random_color(0x0, 0x100)) for _ in range(c)))	
 
 	## Drawing cells... (i.e. classifying w.r.t. the set Sn)
 	image = Image.new("RGB", (w, w)); img = image.load()
@@ -149,11 +150,11 @@ def lp_improved_agnostic_Voronoi(NX, NY, m = 0x1, c = 0x10, p = 2.0, q = 0.25, s
 	#   where the classifiers differ for Lp and for agnostic-Lp).
 	## ⅄⅃LY 
 	f = './images/agnostic-Voronoi-math-L{}@{}'.format(p, sd)
-	image = Image.open(f + '.png'); img = image.load()
-	w, _  = image.size
+	image = Image.open(f + '.png') 
+	img, (w, _)  = image.load(), image.size
 	ax, ay = [], []
 	while(len(ax) < m * c):
-		x, y = RXY(w)
+		x, y = random_xy(w)
 		if(img[x, y] != (0x0, 0x0, 0x0)): ax += [x]; ay += [y]
 	image.close()
 	NX += tuple(ax); NY += tuple(ay)

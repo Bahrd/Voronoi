@@ -21,7 +21,7 @@ from VoronoiUtilities import *
 
 ## Voronoi diagrams and their agnostic versions...
 rsd = int(RA(0x12345678))	
-c, sd = (eval(argv[1]), eval(argv[2])) if len(argv) == 3 else (eval(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
+c, sd = (eval(argv[1]), eval(argv[2])) if len(argv) >= 3 else (eval(argv[1]), rsd) if len(argv) == 2 else (0x10, rsd)
 
 # Lp, for p and q 
 p, q, w = 2.0, 1.0, 0x100

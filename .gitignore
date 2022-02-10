@@ -341,8 +341,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-/images/archives
-/images/examples
 /images
 *.txt
 /Improvement-incompatible
+/samples

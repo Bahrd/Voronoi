@@ -28,17 +28,17 @@ for p in ps:
         ## The diagrams for fixed (planted) patterns... 
         #  ♫♪ This thorn in my side is from the tree I've planted ♪♫ [so]
         #  ♫♪ I'm diggin' my way to somethin' better ♪♫ 
-        _ = lp_planted_Voronoi_diagram(sd, w, p, Hanan = Hanan, context = context)
+        _ = lp_planted_Voronoi(sd, w, p, Hanan = Hanan, context = context)
 
         # The reference diagrams for p and q...
-        NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
+        NXY, _ = lp_Voronoi(w, p, c, sd), lp_Voronoi(w, q, c, sd)
         # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
-        _ = lp_agnostic_Voronoi_diagram(*NXY, p, q, c, sd)
-        # ... and the sets of patterns with different decisions
-        _ = lp_agnostic_Voronoi_ps(p, sd)
+        _ = lp_agnostic_Voronoi(*NXY, p, q, c, sd)
+        # ... and the set of patterns with different decisions
+        _ = lp_Voronoi_set_op(p, sd)
 
-## A bit of clean up...
+## A bit (or more) of clean up...
 for file in glob('.\images\*.png'): remove(file)
 # ... and a (nutshell) summary and fanfares!
-print('seed =', sd)
+print('seed =', sd) # A tribute to CDMA (and H. Lamar & G. Antheil 1942's invention)
 for pl in ((0x1b8, 0x7d), (0x1b8, 0x7d), (0x19f, 0x7d), (0x1b8, 0xfa)): beep(*pl) # ♫♪ ¡⅄⅃LY! ♪♫

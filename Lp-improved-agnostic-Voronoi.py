@@ -25,19 +25,18 @@ c, sd = (int(argv[1]), int(argv[2])) if len(argv) == 3 else (int(argv[1]), rsd) 
 # Lp, for p and q 
 p, q, w = 2.0, 1.0, 0x100
 ## The reference diagrams for p and q...
-NXY, _ = lp_Voronoi_diagram(w, p, c, sd), lp_Voronoi_diagram(w, q, c, sd)
+NXY, _ = lp_Voronoi(w, p, c, sd), lp_Voronoi(w, q, c, sd)
 NXY = list(NXY) # ♫♪ Ad futuram rei memoriam ♪♫
 # ... together with the diagram's Lp-agnostic counterparts w.r.t. p and q
-for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi_diagram(*NXY, *pq, c, sd)
+for pq in ((p, q), (q, p)):	lp_agnostic_Voronoi(*NXY, *pq, c, sd)
 
 ## ... and (supposedly) their more accurate versions
-# Make a difference
-lp_agnostic_Voronoi_ps(p, sd, improved = False)
-# Compute the improved version for Lp
-lp_improved_agnostic_Voronoi_diagram(*NXY, 0x1, c, p, q, sd)
-lp_agnostic_Voronoi_ps(p, sd, improved = True)
+# Make a difference (to compute the improved version for Lp)
+lp_Voronoi_set_op(p, sd, improved = False); lp_improved_agnostic_Voronoi(*NXY, 0x1, c, p, q, sd)
+# Make a difference (to show the improvement)
+lp_Voronoi_set_op(p, sd, improved = True)
 
-## A bit of clean up...
+## A bit (or two) of clean up...
 for file in glob('.\images\*.png'): remove(file)
 # ... and a (nutshell) summary and fanfares!
 print('seed =', sd)

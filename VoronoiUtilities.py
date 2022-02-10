@@ -46,13 +46,9 @@ def ITT(f):
 		return r
 	return time_warper_wrapper
 
-## Let's Cartesian'em all!
-def paint_patterns(img, nxy, px, color):
-	for nx, ny in nxy:
-		for dx, dy in product(px, px):
-			img[nx + dx, ny + dy] = color
-
-def classify_NN(w, p, img, nxy, colors):				
+## A naïve implementation of the 1-NN algorithm
+#  (based on https://rosettacode.org/wiki/Voronoi#Python)
+def classify_nn(w, p, img, nxy, colors):				
 	if type(nxy) != (list or tuple): nxy = list(nxy) # Duct taped duck types: ♫♪ Disposable Heroes ♪♫ 
 	for x, y in product(range(w), range(w)):
 		dmin, j = lp_length(w, w, p), 0
@@ -62,10 +58,16 @@ def classify_NN(w, p, img, nxy, colors):
 				dmin, j = d, i
 		img[x, y] = tuple(colors[j])
 
-### 2D Voronoi diagram generators (based on https://rosettacode.org/wiki/Voronoi_diagram#Python)
-##  A diagram of seeds (patterns) planted on a Hanan grid '.\Lp-agnostic-Voronoi.py 4 78386413 False True'
+## Locating patterns 
+def pin_patterns(img, nxy, motif, color):
+	for nx, ny in nxy:
+		for dx, dy in product(motif, motif): # (Let's Cartesian'em all!)
+			img[nx + dx, ny + dy] = color
+
+### Selection of 2D Voronoi diagrams generators
+##  A diagram of seeds (patterns) planted on a Hanan grid ['.\Lp-agnostic-Voronoi.py 4 78386413 False True']
 @ITT
-def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, context = True):
+def lp_planted_Voronoi(sd, w = 0x100, p = 2.0, Hanan = False, context = True):
 	seed(sd) # Controlled randomness to get a better picture of the phenomenon
 	         # ♫♪ Choking on the bad, bad, bad, bad, bad, bad seed! ♪♫
 	
@@ -81,19 +83,21 @@ def lp_planted_Voronoi_diagram(sd, w = 0x100, p = 2.0, Hanan = False, context = 
 
 	## Filling cells (i.e. performing classification)
 	image = Image.new("RGB", (w, w)); img = image.load()
-	classify_NN(w, p, img, planted, colors)
+	classify_nn(w, p, img, planted, colors)
 	f = './images/Voronoi-planted-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... and painting patterns
-	paint_patterns(img, planted, [-2, -1, 0, 1, 2], c_yellow)
+	pin_patterns(img, planted, [-2, -1, 0, 1, 2], c_yellow)
 	f = './images/Voronoi-planted-sites-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 
-	return planted
+## A working stuff... 
+# 1. lp_Voronoi				      - set S_{N} 
+# 2. lp_agnostic_Voronoi		  - set A_{N} 
+# 3. lp_improved_agnostic_Voronoi - set A_{n+L} 
 
-## Actual working stuff... 
 @ITT
-def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
+def lp_Voronoi(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 	seed(sd) # Controlled randomness that yields the same pseudo-random patterns for various p
 			 # Just a standard random case... # Black (, red) & white(-ish)...
 	
@@ -102,18 +106,18 @@ def lp_Voronoi_diagram(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 
 	## Drawing cells... (i.e. classifying w.r.t. the set Sn)
 	image = Image.new("RGB", (w, w)); img = image.load()
-	classify_NN(w, p, img, nxy, nrgb)
+	classify_nn(w, p, img, nxy, nrgb)
 	f = './images/Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... and patterns
-	paint_patterns(img, nxy, [-2, -1, 0, 1, 2], c_yellow)
+	pin_patterns(img, nxy, [-2, -1, 0, 1, 2], c_yellow)
 	f = './images/Voronoi-sites-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 
 	return zip(*nxy)
 
 @ITT
-def lp_agnostic_Voronoi_diagram(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303):
+def lp_agnostic_Voronoi(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303):
 	## Essentially, given N points, we 'yield' a Cartesian product of two vectors 
 	# of N elements being their first and second coordinates, respectively
 	f = './images/Voronoi-L{}@{}'.format(p, sd)
@@ -124,17 +128,17 @@ def lp_agnostic_Voronoi_diagram(NX, NY, p = 2.0, q = 0.25, c = 0x10, sd = 0x303)
 
 	## Drawing cells... (i.e. classifying w.r.t. the set An)
 	image = Image.new("RGB", (w, w)); img = image.load()
-	classify_NN(w, p, img, product(NX, NY), nrgb)
+	classify_nn(w, p, img, product(NX, NY), nrgb)
 	f = './images/Lp-agnostic-Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... and patterns
-	paint_patterns(img, product(NX, NY),    [-1, 0, 1],	c_white)
-	paint_patterns(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
+	pin_patterns(img, product(NX, NY),    [-1, 0, 1],	c_white)
+	pin_patterns(img, zip(NX, NY), [-2, -1, 0, 1, 2], c_yellow)
 	f = './images/Lp-agnostic-Voronoi-sites-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'png'); image.save(f + '.pdf', 'pdf')
 
 @ITT
-def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303):
+def lp_improved_agnostic_Voronoi(NX, NY, m = 0x1, c = 0x10, p = 2.0, q = 0.25, sd = 0x303):
 	## Generate extra patterns for extra precision (in locations
 	#   where the classifiers differ for Lp and for agnostic-Lp).
 	## ⅄⅃LY 
@@ -156,24 +160,24 @@ def lp_improved_agnostic_Voronoi_diagram(NX, NY, m = 0x1, c = 0x10, p = 2.0, q =
 	
 	## Filling... (i.e. classifying w.r.t. the set An+l)
 	image = Image.new("RGB", (w, w)); img = image.load()
-	classify_NN(w, p, img, product(NX, NY), nrgb)
+	classify_nn(w, p, img, product(NX, NY), nrgb)
 	f = './images/Lp-improved-agnostic-Voronoi-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 	## ... and painting patterns	
-	paint_patterns(img, product(NX, NY),           [-1, 0, 1], c_white)
-	paint_patterns(img, zip(NX, NY),    	[-2, -1, 0, 1, 2], c_yellow)
-	paint_patterns(img, zip(ax, ay), [-3, -2, -1, 0, 1, 2, 3], c_red)
+	pin_patterns(img, product(NX, NY),           [-1, 0, 1], c_white)
+	pin_patterns(img, zip(NX, NY),    	[-2, -1, 0, 1, 2], c_yellow)
+	pin_patterns(img, zip(ax, ay), [-3, -2, -1, 0, 1, 2, 3], c_red)
 	f = './images/Lp-improved-agnostic-Voronoi-sites-L{}@{}'.format(p, sd)
 	image.save(f + '.png', 'PNG'); image.save(f + '.pdf', 'PDF')
 
-## Perform an 'opr' on diagrams (a difference in particular, when opr = 'abs(a - b)'
-def lp_agnostic_Voronoi_ps(p = 2, sd = 0x303, improved = False, opr = 'abs(a - b)'):
+## Perform an 'operation' on diagrams (a difference in particular, when operation = 'abs(a - b)'
+def lp_Voronoi_set_op(p = 2, sd = 0x303, improved = False, operation = 'abs(a - b)'):
 	fa = './images/Lp-{}agnostic-Voronoi-L{}@{}.png'.format('improved-' if improved else '', p, sd)
 	if(isfile(fa)):
 		fp = './images/Voronoi-L{}@{}.png'.format(p, sd)
 		fav, fpv = Image.open(fa), Image.open(fp); fdv = Image.new('RGB', fpv.size)
 		#ImageMath doesn't process RGB images (at the time of writing this code)...
-		fdv = Image.merge('RGB', [ImageMath.eval('convert({}, "L")'.format(opr), a = ipb, b = iqb) \
+		fdv = Image.merge('RGB', [ImageMath.eval('convert({}, "L")'.format(operation), a = ipb, b = iqb) \
 								  for (ipb, iqb) in zip(fpv.split(), fav.split())])
 		f = './images/Agnostic-{}Voronoi-math-L{}@{}'.format('improved-' if improved else '', p, sd)
 		fdv.save(f + '.png', 'PNG'); fdv.save(f + '.pdf', 'PDF')

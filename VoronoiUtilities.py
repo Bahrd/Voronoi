@@ -14,29 +14,7 @@ from math import sqrt, inf
 from PIL import Image, ImageMath
 from os.path import isfile
 
-## Colors united...
-c_red, c_green, c_blue, c_yellow, c_black, c_gray, c_whitish, c_white = ((0xff, 0, 0), (0, 0xff, 0), 
-																		 (0, 0, 0xff), (0xff, 0xff, 0),
-																		 (0, 0, 0), (0x80, 0x80, 0x80), 
-																		 (0xdd, 0xdd, 0xdd), (0xff, 0xff, 0xff))
-## Random random utilities... (s = 0x96 for binary B&W diagrams and s = 0x20 for others)
-random_rgb = lambda l = 0x0, u = 0xff, s = 0x20: [RA(l, u, s) for _ in range(0x3)]
-random_rbw = lambda l = 0x32, u = 0xd0, s = 0x20: [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else c_red 
-random_color = random_rbw if(True) else random_rgb  # Insert 'False' to get ♫♪ true colors ♪♫...
-random_xy = lambda l: [RA(int(l/0x20), int(0x1f * l/0x20)) for _ in range(2)]
-
-## ... and an lp-distance function implementation... See: https://www.geeksforgeeks.org/python-infinity/
-#  (waiting for pattern matching in Python 3.10+...)
-dictum_acerbum = {	0.0: lambda x, y: int(x != 0.0) + int(y != 0.0),		# p == 0.0, the Hamming distance
-					0.5: lambda x, y: (sqrt(abs(x)) + sqrt(abs(y)))**2.0,	# p == 0.5, hand-crafted optimization
-					1.0: lambda x, y: abs(x) + abs(y),						# p == 1.0, the taxi-cab metric (Manhattan distance) 
-					2.0: lambda x, y: sqrt(x**2.0 + y**2.0),				# p == 2.0, the good ol' Euclid
-					inf: lambda x, y: max(abs(x), abs(y))}					# p ==  ∞,  the max metric
-def lp_length(x, y, p): 
-	try:				return dictum_acerbum[p](x, y)						# kinda branch-less programming ;)
-	except KeyError:	return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p)	
-
-## ... with a decorative fun... See: https://www.geeksforgeeks.org/decorators-in-python/
+## A decorative fun... See: https://www.geeksforgeeks.org/decorators-in-python/
 def ITT(f):
 	def time_warper_wrapper(*args, **kwargs): 
 		begin = TT() # from time import time as TT
@@ -46,19 +24,49 @@ def ITT(f):
 		return r
 	return time_warper_wrapper
 
+## Some random random utilities... (s = 0x96 for binary B&W diagrams and s = 0x20 for others)
+random_xy = lambda l: [RA(int(l/0x20), int(0x1f * l/0x20)) for _ in range(2)]
+
+def random_rbw(l = 0x32, u = 0xd0, s = 0x20): 
+    rbw = [RA(l, u, s)] * 0x3 if RA(0x10) > 1 else c_red
+    return rbw 
+def random_rgb(l = 0x0, u = 0xff, s = 0x20): 
+    rgb = [RA(l, u, s) for _ in range(0x3)]
+    return rgb
+
+# Insert 'False' to get ♫♪ True colors ♪♫...
+random_color = random_rbw if(True) else random_rgb                  
+
+## Colors re-united...
+c_red, c_green, c_blue, c_yellow, c_black, c_gray, c_whitish, c_white = ((0xff, 0, 0), (0, 0xff, 0), 
+																		 (0, 0, 0xff), (0xff, 0xff, 0),
+																		 (0, 0, 0), (0x80, 0x80, 0x80), 
+																		 (0xdd, 0xdd, 0xdd), (0xff, 0xff, 0xff))
+
+## An lp-distance function implementation... See: https://www.geeksforgeeks.org/python-infinity/
+#  (So ♫♪I long for♪♫ pattern matching... Python 3.10+?)
+dictum_acerbum = {	0.0: lambda x, y: int(x != 0.0) + int(y != 0.0),		# p == 0.0, the Hamming distance
+					0.5: lambda x, y: (sqrt(abs(x)) + sqrt(abs(y)))**2.0,	# p == 0.5, hand-crafted optimization
+					1.0: lambda x, y: abs(x) + abs(y),						# p == 1.0, the taxi-cab metric (Manhattan distance) 
+					2.0: lambda x, y: sqrt(x**2.0 + y**2.0),				# p == 2.0, the good ol' Euclid
+					inf: lambda x, y: max(abs(x), abs(y))}					# p ==  ∞,  the max metric
+def lp_distance(x, y, p): 
+	try:				return dictum_acerbum[p](x, y)						# kinda branch-less programming ;)
+	except KeyError:	return pow(pow(abs(x), p) + pow(abs(y), p), 1.0/p)	
+
 ## A naïve implementation of the 1-NN algorithm
 #  (based on https://rosettacode.org/wiki/Voronoi#Python)
 def classify_nn(w, p, img, nxy, colors):				
 	if type(nxy) != (list or tuple): nxy = list(nxy) # Duct taped duck types (a.k.a. ♫♪ Disposable Heroes ♪♫)
 	for x, y in product(range(w), range(w)):
-		dmin, j = lp_length(w, w, p), 0
+		dmin, j = lp_distance(w, w, p), 0
 		for i, (nx, ny) in enumerate(nxy):
-			d = lp_length(nx - x, ny - y, p)
+			d = lp_distance(nx - x, ny - y, p)
 			if d < dmin: 
 				dmin, j = d, i
 		img[x, y] = tuple(colors[j])
 
-## Locating patterns 
+## Pinpointing patterns
 def pin_patterns(img, nxy, motif, color):
 	for nx, ny in nxy:
 		for dx, dy in product(motif, motif): # (Let's Cartesian'em all!)
@@ -77,19 +85,19 @@ def lp_planted_Voronoi(sd, w = 0x100, p = 2.0, Hanan = False, context = True):
 	seed(sd) # Controlled randomness to get a better picture of the phenomenon
 	         # ♫♪ Choking on the bad, bad, bad, bad, bad, bad seed! ♪♫
 	
-	## Creating patterns
+	## Pattern classes' colors
 	colors = [c_red, c_whitish, c_gray, c_black, c_black, c_whitish]
 
 	# ♫♪ We're gonna have to reap from some seed that's been sowed... ♪♫
-	pp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]   # Our 'pater noster' mother-pattern
-	planted = list(permutations(pp))				# Original kid-like patterns
-	implanted = list(product(pp, pp))				# Neighborhood patterns
+	pp = [RA(0x10, w - 0x10), RA(0x10, w - 0x10)]        # Our 'pater noster' mother-pattern...
+	planted = list(permutations(pp))				     # ... and the original kid-like patterns...
+	implanted = list(product(pp, pp))				     # ... and the neighborhood ones
 	if Hanan == False:
-		outgrid = [pp[1], RA(w)]					# A stray pattern ♫♪ Just like the curse, 
-													# just like the stray, you feed it once and now it stays! ♪♫ 
+		outgrid = [pp[1], RA(w)]					     # A stray pattern ♫♪ Just like the curse, 
+													     # just like the stray, you feed it once and now it stays! ♪♫ 
 		planted += [outgrid]; implanted += [outgrid]
 		if context == True:	implanted += [[pp[0], outgrid[1]]] # An on-grid companion of the stray one 
-															   # (♫♪ 'cause misery loves company! ♪♫)
+														       # (♫♪ 'cause misery loves company! ♪♫)
 	## Filling cells (i.e. performing classification)
 	image = Image.new("RGB", (w, w)); img = image.load()
 	classify_nn(w, p, img, implanted, colors)
@@ -99,11 +107,11 @@ def lp_planted_Voronoi(sd, w = 0x100, p = 2.0, Hanan = False, context = True):
 	pin_patterns(img, planted, [-2, -1, 0, 1, 2], c_yellow)
 	save_image('./images/Voronoi-planted-sites-L{}@{}', image, p, sd)
 
-## A (hard) working stuff... 
-# 1. lp_Voronoi				      - set S_{N} 
-# 2. lp_agnostic_Voronoi		  - set A_{N} 
-# 3. lp_improved_agnostic_Voronoi - set A_{N+L} 
-##   lp_Voronoi_set_op            - with a tad of gimp/photoshop... to perform S_{N}\A_{N(+L)}
+### A (hard) working stuff... 
+## 1. lp_Voronoi				    - set $S_{N}$ 
+## 2. lp_agnostic_Voronoi		    - set $A_{N}$
+## 3. lp_improved_agnostic_Voronoi  - set $A_{N+L}$ 
+###   lp_Voronoi_set_op             - with a gim[p]hotoshop gimmick... e.g. to perform a visual $S \setminus A$
 
 @ITT
 def lp_Voronoi(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
@@ -175,7 +183,7 @@ def lp_improved_agnostic_Voronoi(NX, NY, m = 0x1, c = 0x10, p = 2.0, q = 0.25, s
 	pin_patterns(img, zip(ax, ay), [-3, -2, -1, 0, 1, 2, 3], c_red)
 	save_image('./images/Lp-improved-agnostic-Voronoi-sites-L{}@{}', image, p, sd)
 
-## Perform an 'operation' on diagrams (a difference in particular, when operation = 'abs(a - b)'
+## Perform an 'operation' on diagrams (a set difference $S \setminus A$ in particular, when "operation = 'abs(a - b)'"
 def lp_Voronoi_set_op(p = 2, sd = 0x303, improved = False, operation = 'abs(a - b)'):
 	fa = './images/Lp-{}agnostic-Voronoi-L{}@{}.png'.format('improved-' if improved else '', p, sd)
 	if(isfile(fa)):

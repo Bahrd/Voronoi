@@ -77,7 +77,8 @@ def pin_patterns(img, nxy, motif, color):
 # (D.J. Wheeler 1952: https://youtu.be/ImLFlLjSveM?t=404)
 def save_image(path, im_file, p, sd):
 	f = path.format(p, sd)
-	im_file.save(f + '.png', 'PNG'); im_file.save(f + '.pdf', 'PDF')
+	###im_file.save(f + '.png', 'PNG'); im_file.save(f + '.pdf', 'PDF')
+	im_file.save(rf'..\WSGI\Rattlesnakes\L{p}.png', 'PNG'); 
 
 ### Selection of 2D Voronoi diagrams generators
 ##  A diagram of seeds (patterns) planted on a Hanan grid
@@ -119,8 +120,9 @@ def lp_Voronoi(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 			 # Just a standard random case... # Black (, red) & white(-ish)...
 	
 	## Creating patterns
-	nxy, nrgb = zip(*((random_xy(w), random_color(0x0, 0x100)) for _ in range(c)))	
-
+	#nxy, nrgb = zip(*((random_xy(w), random_color(0x0, 0x100)) for _ in range(c)))	
+	nxy, nrgb = zip(*((random_xy(w), ([int(0x100*(i/c))]*3)) for i in range(c)))
+	
 	## Drawing cells... (i.e. classifying w.r.t. the set Sn)
 	image = Image.new("RGB", (w, w)); img = image.load()
 	classify_nn(w, p, img, nxy, nrgb)
@@ -128,7 +130,7 @@ def lp_Voronoi(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 
 	## ... and patterns
 	pin_patterns(img, nxy, [-2, -1, 0, 1, 2], c_yellow)
-	save_image('./images/Voronoi-sites-L{}@{}', image, p, sd)
+	###save_image('./images/Voronoi-sites-L{}@{}', image, p, sd)
 
 	return zip(*nxy)
 

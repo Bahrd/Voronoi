@@ -22,4 +22,4 @@ $L_p$-agnostic Hanan-grid approximations $\mathcal{A}_N$ and $\mathcal{A}_{N+L}$
 
 </center>
 
-# <center>¡Hola «⅄⅃LY»!</center>
+# <center>¡Hola «⅄⅂LY»!</center>

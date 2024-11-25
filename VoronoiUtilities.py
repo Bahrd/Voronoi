@@ -66,6 +66,20 @@ def classify_nn(w, p, img, nxy, colors):
 				dmin, j = d, i
 		img[x, y] = tuple(colors[j])
 
+
+## A dot product-based 1-NN algorithm
+def classify_dp_nn(w, img, nxy, colors):	
+	dpm = lambda x, y, nx, ny: (x*nx + y*ny)**2/((x**2 + y**2) * (nx**2 + ny**2))
+	if type(nxy) != (list or tuple): nxy = list(nxy)
+	for x, y in product(range(1, w), range(1, w)):
+		dpmax, j = 0, 0
+		for i, (nx, ny) in enumerate(nxy):
+			d = dpm(x, y, nx, ny)
+			#d = 
+			if d > dpmax: 
+				dpmax, j = d, i
+		img[x, y] = tuple(colors[j])
+
 ## Pinpointing patterns
 def pin_patterns(img, nxy, motif, color):
 	for nx, ny in nxy:
@@ -75,10 +89,10 @@ def pin_patterns(img, nxy, motif, color):
 ## Save'm all...
 # (D'u know, subroutines were invented (for a reason ;) about 70 years ago? 
 # (D.J. Wheeler 1952: https://youtu.be/ImLFlLjSveM?t=404)
-def save_image(path, im_file, p, sd):
+def save_image(path, im_file, p, sd, pdf = True):
 	f = path.format(p, sd)
-	###im_file.save(f + '.png', 'PNG'); im_file.save(f + '.pdf', 'PDF')
-	im_file.save(rf'..\WSGI\Rattlesnakes\L{p}.png', 'PNG'); 
+	im_file.save(f + '.png', 'PNG'); 
+	if pdf: im_file.save(f + '.pdf', 'PDF')
 
 ### Selection of 2D Voronoi diagrams generators
 ##  A diagram of seeds (patterns) planted on a Hanan grid
@@ -108,6 +122,23 @@ def lp_planted_Voronoi(sd, w = 0x100, p = 2.0, Hanan = False, context = True):
 	pin_patterns(img, planted, [-2, -1, 0, 1, 2], c_yellow)
 	save_image('./images/Voronoi-planted-sites-L{}@{}', image, p, sd)
 
+def lp_hexplanted_Voronoi(w = 0x100, p = 2, Δ = 0x20):
+
+	from math import cos, pi as π
+	planted, colors = [], []
+	for n in range(Δ, w - Δ, Δ):
+		for m in range(w//Δ):
+			planted += [[n + Δ//2 * (m % 2), Δ*(1 + m*cos(π/6))]]
+			colors += [random_rbw()]
+
+	## Filling cells (i.e. performing classification)
+	image = Image.new("RGB", (w, w)); img = image.load()
+	classify_nn(w, p, img, planted, colors)
+	## ... and painting patterns
+	pin_patterns(img, planted, [-2, -1, 0, 1, 2], c_yellow)
+	save_image('./images/Voronoi-hexplanted-sites-L{}@{}', image, p, 0, pdf = False)
+
+
 ### A (hard) working stuff... 
 ## 1. lp_Voronoi				    - set $S_{N}$ 
 ## 2. lp_agnostic_Voronoi		    - set $A_{N}$
@@ -127,10 +158,28 @@ def lp_Voronoi(w = 0x100, p = 2.0, c = 0x10, sd = 0x303):
 	image = Image.new("RGB", (w, w)); img = image.load()
 	classify_nn(w, p, img, nxy, nrgb)
 	save_image('./images/Voronoi-L{}@{}', image, p, sd)
-
+	print(f'./images/Voronoi-L{p}@{sd}')
 	## ... and patterns
 	pin_patterns(img, nxy, [-2, -1, 0, 1, 2], c_yellow)
-	###save_image('./images/Voronoi-sites-L{}@{}', image, p, sd)
+	save_image('./images/Voronoi-sites-L{}@{}', image, p, sd)
+
+	return zip(*nxy)
+
+@ITT
+def dp_Voronoi(w = 0x100, c = 0o10, sd = 0x303):
+	seed(sd) # Controlled randomness that yields the same pseudo-random patterns for various p
+			 # Just a standard random case... # Black (, red) & white(-ish)...
+	
+	## Creating patterns
+	nxy, nrgb = zip(*((random_xy(w), random_color(0x0, 0x100)) for _ in range(c)))	
+	
+	## Drawing cells... (i.e. classifying w.r.t. the set Sn)
+	image = Image.new("RGB", (w, w)); img = image.load()
+	classify_dp_nn(w, img, nxy, nrgb)
+	save_image('./images/Voronoi-dotted', image, 0, sd, pdf = False)
+	## ... and patterns
+	pin_patterns(img, nxy, [-2, -1, 0, 1, 2], c_yellow)
+	save_image('./images/Voronoi-sites-dotted', image, 0, sd, pdf = False)
 
 	return zip(*nxy)
 
